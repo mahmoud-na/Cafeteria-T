@@ -1,43 +1,71 @@
 import 'package:bloc/bloc.dart';
 import 'package:cafeteriat/shared/bloc-observer.dart';
+import 'package:cafeteriat/shared/cubit/cubit.dart';
+import 'package:cafeteriat/shared/cubit/states.dart';
+import 'package:cafeteriat/shared/network/local/cache_helper.dart';
+import 'package:cafeteriat/shared/styles/themes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'layout/cafeteria_app/cafeteria_app_layout.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   Bloc.observer = MyBlocObserver();
-
-  runApp(const MyApp());
+  await CacheHelper.init();
+  bool? isDark = CacheHelper.getData(key: "isDark");
+  late Widget appStartingScreen;
+  appStartingScreen = Container();
+  runApp(
+    MyApp(
+      isDark: isDark,
+      startingScreen: appStartingScreen,
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final bool? isDark;
+  final Widget? startingScreen;
+
+  const MyApp({
+    Key? key,
+    this.isDark,
+    this.startingScreen,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Cafeteria-T',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => AppCubit()
+            ..changeAppThemeMode(
+              fromShared: isDark,
+            ),
+        ),
+      ],
+      child: BlocConsumer<AppCubit, AppStates>(
+        listener: (context, state) {},
+        builder: (context, state) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Cafeteria-T',
+            theme: lightTheme,
+            darkTheme: darkTheme,
+            themeMode: AppCubit.get(context).isDarkMode
+                ? ThemeMode.dark
+                : ThemeMode.light,
+            home: const Directionality(
+              child: CafeteriaHomeScreen(),
+              textDirection: TextDirection.rtl,
+              // textDirection: TextDirection.ltr,
+            ),
+          );
+        },
       ),
-      home: MyHomePage(),
     );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Center(),
-      );
   }
 }
