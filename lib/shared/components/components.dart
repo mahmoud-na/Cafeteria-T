@@ -1,3 +1,4 @@
+import 'package:cafeteriat/shared/styles/icon_broken.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -38,24 +39,24 @@ Widget defaultTextButton({
     );
 
 
-// PreferredSizeWidget defaultAppBar({
-//   required BuildContext context,
-//   String? title,
-//   List<Widget>? actions,
-// }) =>
-//     AppBar(
-//       titleSpacing: 5.0,
-//       leading: IconButton(
-//         onPressed: () {
-//           Navigator.pop(context);
-//         },
-//         icon: const Icon(
-//           IconBroken.Arrow___Left_2,
-//         ),
-//       ),
-//       title: Text(title!),
-//       actions: actions,
-//     );
+PreferredSizeWidget defaultAppBar({
+  required BuildContext context,
+  String? title,
+  List<Widget>? actions,
+}) =>
+    AppBar(
+      titleSpacing: 5.0,
+      leading: IconButton(
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        icon: const Icon(
+          IconBroken.Arrow___Left_2,
+        ),
+      ),
+      title: Text(title!),
+      actions: actions,
+    );
 
 
 
