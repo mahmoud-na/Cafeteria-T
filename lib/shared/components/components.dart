@@ -1,10 +1,11 @@
+import 'package:cafeteriat/shared/styles/colors.dart';
 import 'package:cafeteriat/shared/styles/icon_broken.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 Widget defaultButton({
   double width = double.infinity,
-  Color backgroundColor = Colors.blue,
+  // Color backgroundColor = defa,
   bool isUpperCase = true,
   double borderRadius = 3.0,
   required VoidCallback onPressed,
@@ -22,12 +23,9 @@ Widget defaultButton({
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
-        color: backgroundColor,
+        color: defaultColor,
       ),
     );
-
-
-
 
 Widget defaultTextButton({
   required String text,
@@ -37,7 +35,6 @@ Widget defaultTextButton({
       onPressed: onPressed,
       child: Text(text.toUpperCase()),
     );
-
 
 PreferredSizeWidget defaultAppBar({
   required BuildContext context,
@@ -57,8 +54,6 @@ PreferredSizeWidget defaultAppBar({
       title: Text(title!),
       actions: actions,
     );
-
-
 
 Widget defaultFormField({
   required TextEditingController textEditingController,
@@ -91,16 +86,30 @@ Widget defaultFormField({
       ),
     );
 
+Widget defaultListTile({
+  required String title,
+  Widget? icon,
+  required Function() onTap,
+}) =>
+    ListTile(
+      title: Text(
+        title,
+      ),
+      leading: icon,
+      onTap: onTap,
+    );
 
 Widget myDivider() => Padding(
-  padding: const EdgeInsets.all(20.0),
-  child: Container(
-    width: double.infinity,
-    height: 1.0,
-    color: Colors.grey[300],
-  ),
-);
-
+      padding: const EdgeInsets.symmetric(
+        vertical: 5.0,
+        horizontal: 20.0,
+      ),
+      child: Container(
+        width: double.infinity,
+        height: 0.6,
+        color: defaultColor,
+      ),
+    );
 
 void navigateTo(context, Widget widget) {
   Navigator.push(
@@ -117,9 +126,8 @@ void navigateAndReplace(context, Widget widget) {
       MaterialPageRoute(
         builder: (context) => widget,
       ),
-          (route) => false);
+      (route) => false);
 }
-
 
 void showToast({
   required String msg,
