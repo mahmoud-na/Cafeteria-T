@@ -4,6 +4,7 @@ import 'package:cafeteriat/models/cafeteria_app/history_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/my_order_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/product_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/submit_order_response_model.dart';
+import 'package:cafeteriat/models/cafeteria_app/user_model.dart';
 import 'package:cafeteriat/modules/cafeteria_app/dessert/desserts_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/drinks/drinks_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/food/food_screen.dart';
@@ -27,14 +28,12 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     const DessertsScreen(),
   ];
 
-  List<String> titles = [
+  List<String> appBarTitles = [
     'أكل',
     'مشروبات',
     'تسالي',
     'حلويات',
   ];
-
-
 
   ProductModel? menuModel;
   void getMenuData() {
@@ -49,12 +48,26 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     });
   }
 
+  UserModel? userModel;
+  void getUserData({
+    required String activationCode,
+  }) {
+    emit(CafeteriaUserDataLoadingState());
+
+    SocketHelper.getData(query: "EID:0,ACTCODE:$activationCode<EOF>")
+        .then((value) {
+      userModel = UserModel.fromJson(value);
+      emit(CafeteriaUserDataSuccessState());
+    }).catchError((error) {
+      print(error.toString());
+      emit(CafeteriaUserDataErrorState(error.toString()));
+    });
+  }
 
   HistoryModel? currentHistoryModel;
   void getCurrentHistoryData() {
     emit(CafeteriaCurrentHistoryLoadingState());
     SocketHelper.getData(query: "EID:$uId,CurrentHistory<EOF>").then((value) {
-
       currentHistoryModel = HistoryModel.fromJson(value, "CurrentHistory");
       emit(CafeteriaCurrentHistorySuccessState());
     }).catchError((error) {
@@ -62,6 +75,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       emit(CafeteriaCurrentHistoryErrorState(error.toString()));
     });
   }
+
   HistoryModel? previousHistoryModel;
   void getPreviousHistoryData() {
     emit(CafeteriaPreviousHistoryLoadingState());
@@ -100,6 +114,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       emit(CafeteriaMyOrderErrorState(error.toString()));
     });
   }
+
   SubmitOrderResponseModel? submitOrderResponseModel;
   void postMyOrderData({
     required String order,

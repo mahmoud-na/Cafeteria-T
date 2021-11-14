@@ -7,7 +7,7 @@ class UserModel {
 }
 
 class LoginDataModel {
-  bool? activationValid;
+  String? activationValid;
   String? name;
   String? userId;
   String? profileImage;

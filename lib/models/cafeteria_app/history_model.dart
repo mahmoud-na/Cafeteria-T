@@ -1,17 +1,16 @@
 class HistoryModel {
   HistoryDataModel? data;
 
-  HistoryModel.fromJson(Map<String, dynamic> json,String historyType) {
+  HistoryModel.fromJson(Map<String, dynamic> json, String historyType) {
     data = HistoryDataModel.fromJson(json[historyType][0]);
   }
 }
 
 class HistoryDataModel {
-String? dateTime;
-String? price;
-String? payType;
-List<HistoryOrdersModel> ordersList = [];
-
+  String? dateTime;
+  double? price;
+  String? payType;
+  List<HistoryOrdersModel> ordersList = [];
 
   HistoryDataModel.fromJson(Map<String, dynamic> json) {
     dateTime = json['datetime'];
@@ -41,5 +40,3 @@ class HistoryOrdersModel {
     orderStatus = json['OrderStatus'];
   }
 }
-
-

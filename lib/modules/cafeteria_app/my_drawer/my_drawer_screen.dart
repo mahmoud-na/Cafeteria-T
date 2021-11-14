@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/states.dart';
 import 'package:cafeteriat/modules/cafeteria_app/about/about_screen.dart';
@@ -7,7 +6,6 @@ import 'package:cafeteriat/modules/cafeteria_app/previous_history/previous_histo
 import 'package:cafeteriat/modules/cafeteria_app/profile/profile_screen.dart';
 import 'package:cafeteriat/shared/components/components.dart';
 import 'package:cafeteriat/shared/styles/colors.dart';
-import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -82,12 +80,11 @@ class MyDrawer extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 90.0,
-                  vertical: 30.0,
                 ),
                 child: OutlinedButton(
                   style: ButtonStyle(
                     foregroundColor: MaterialStateProperty.all<Color>(
-                      Colors.black,
+                      Colors.grey,
                     ),
                     side: MaterialStateProperty.all<BorderSide>(
                       const BorderSide(
@@ -132,8 +129,7 @@ class MyDrawer extends StatelessWidget {
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               child: const CircleAvatar(
                 radius: 50.0,
-                backgroundImage: NetworkImage(
-                    'https://image.freepik.com/free-photo/sweet-dates-clay-plate-stone-tile-wooden-background_176474-5655.jpg'),
+                backgroundImage: AssetImage('assets/images/person.png'),
               ),
             ),
           ],
