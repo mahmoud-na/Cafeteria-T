@@ -5,7 +5,6 @@ import 'package:cafeteriat/modules/cafeteria_app/my_drawer/my_drawer_screen.dart
 import 'package:cafeteriat/modules/cafeteria_app/search/search_screen.dart';
 import 'package:cafeteriat/shared/components/components.dart';
 import 'package:cafeteriat/shared/cubit/cubit.dart';
-import 'package:cafeteriat/shared/styles/icon_broken.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,7 +21,7 @@ class CafeteriaHomeScreen extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              cubit.titles[cubit.navBarCurrentIndex],
+              cubit.appBarTitles[cubit.navBarCurrentIndex],
             ),
             actions: [
               if (cubit.isCartEmpty)

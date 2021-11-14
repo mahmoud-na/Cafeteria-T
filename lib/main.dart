@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
-import 'package:cafeteriat/shared/bloc-observer.dart';
+import 'package:cafeteriat/shared/bloc_observer.dart';
 import 'package:cafeteriat/shared/cubit/cubit.dart';
 import 'package:cafeteriat/shared/cubit/states.dart';
 import 'package:cafeteriat/shared/network/local/cache_helper.dart';
@@ -48,12 +48,13 @@ class MyApp extends StatelessWidget {
             ),
         ),
         BlocProvider(
-          create: (context) => CafeteriaCubit()
-            ..getMenuData()
-            ..getCurrentHistoryData()
-            ..getPreviousHistoryData()
-            ..getMyOrderData(),
-        ),
+            create: (context) => CafeteriaCubit()
+              ..getMenuData()
+              ..getCurrentHistoryData()
+            // ..getPreviousHistoryData()
+            // ..getMyOrderData(),
+            // ..getUserData(activationCode: "jm"),
+            ),
       ],
       child: BlocConsumer<AppCubit, AppStates>(
         listener: (context, state) {},
