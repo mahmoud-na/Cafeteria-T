@@ -8,7 +8,6 @@ import 'package:cafeteriat/shared/styles/themes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'layout/cafeteria_app/cafeteria_app_layout.dart';
 
 Future<void> main() async {
@@ -49,8 +48,10 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
             create: (context) => CafeteriaCubit()
-              ..getMenuData()
-              ..getCurrentHistoryData()
+              ..getMenuData().then((value) {
+                // CafeteriaCubit().getCurrentHistoryData();
+              })
+              // ..getCurrentHistoryData()
             // ..getPreviousHistoryData()
             // ..getMyOrderData(),
             // ..getUserData(activationCode: "jm"),

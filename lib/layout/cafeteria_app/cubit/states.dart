@@ -75,3 +75,10 @@ class CafeteriaUserDataErrorState extends CafeteriaStates {
   final String error;
   CafeteriaUserDataErrorState(this.error);
 }
+
+class CafeteriaChangeIncrementCounterSuccessState extends CafeteriaStates {}
+class CafeteriaChangeDecrementCounterSuccessState extends CafeteriaStates {}
+
+class CafeteriaChangeIncrementCounterErrorState extends CafeteriaStates {}
+class CafeteriaChangeDecrementCounterErrorState extends CafeteriaStates {}
+

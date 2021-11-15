@@ -1,16 +1,20 @@
 import 'package:bloc/bloc.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/states.dart';
 import 'package:cafeteriat/models/cafeteria_app/history_model.dart';
+import 'package:cafeteriat/models/cafeteria_app/my_cart_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/my_order_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/product_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/submit_order_response_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/user_model.dart';
+import 'package:cafeteriat/modules/cafeteria_app/checkout/checkout_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/dessert/desserts_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/drinks/drinks_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/food/food_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/snacks/snacks_screen.dart';
 import 'package:cafeteriat/shared/components/constants.dart';
 import 'package:cafeteriat/shared/network/remote/socket_helper.dart';
+import 'package:cafeteriat/shared/network/remote/sockets.dart';
+import 'package:cafeteriat/shared/styles/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -36,7 +40,8 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   ];
 
   ProductModel? menuModel;
-  void getMenuData() {
+
+  Future<void> getMenuData() async {
     emit(CafeteriaMenuLoadingState());
 
     SocketHelper.getData(query: "EID:$uId,DayMenu<EOF>").then((value) {
@@ -49,6 +54,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   }
 
   UserModel? userModel;
+
   void getUserData({
     required String activationCode,
   }) {
@@ -65,7 +71,8 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   }
 
   HistoryModel? currentHistoryModel;
-  void getCurrentHistoryData() {
+
+  Future<void> getCurrentHistoryData() async {
     emit(CafeteriaCurrentHistoryLoadingState());
     SocketHelper.getData(query: "EID:$uId,CurrentHistory<EOF>").then((value) {
       currentHistoryModel = HistoryModel.fromJson(value, "CurrentHistory");
@@ -77,6 +84,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   }
 
   HistoryModel? previousHistoryModel;
+
   void getPreviousHistoryData() {
     emit(CafeteriaPreviousHistoryLoadingState());
     SocketHelper.getData(
@@ -102,6 +110,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   //   });
   // }
   MyOrderModel? myOrderModel;
+
   void getMyOrderData() {
     emit(CafeteriaMyOrderLoadingState());
     SocketHelper.getData(
@@ -116,6 +125,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   }
 
   SubmitOrderResponseModel? submitOrderResponseModel;
+
   void postMyOrderData({
     required String order,
     required String name,
@@ -133,8 +143,97 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     });
   }
 
+  Widget shopItemRemoveIcon(var menuModel,context) {
+    if (menuModel.counter > 0) {
+      return IconButton(
+        onPressed: () {
+          decrementMenuItemCounter(menuModel,context);
+        },
+        icon: const Icon(Icons.remove_circle_outline,
+            size: 40.0, color: Colors.redAccent),
+      );
+    } else {
+      // emit(CafeteriaChangeDecrementCounterErrorState());
+      return const IconButton(
+          onPressed: null,
+          icon: Icon(
+            Icons.remove_circle_outline,
+            size: 40.0,
+            color: Colors.grey,
+          ));
+    }
+  }
+
+  Widget shopItemAddIcon(var menuModel) {
+    if (menuModel.counter < 1000) {
+      return IconButton(
+        onPressed: () {
+          incrementMenuItemCounter(menuModel);
+        },
+        icon: const Icon(
+          Icons.add_circle_outline,
+          size: 40.0,
+          color: defaultColor,
+        ),
+      );
+    } else {
+      // emit(CafeteriaChangeIncrementCounterErrorState());
+      return const IconButton(
+        onPressed: null,
+        icon: Icon(
+          Icons.add_circle_outline,
+          size: 40.0,
+          color: Colors.grey,
+        ),
+      );
+    }
+  }
+
   void changeBottomNav(int index) {
     navBarCurrentIndex = index;
     emit(CafeteriaChangeNavBarState());
+  }
+
+  void incrementMenuItemCounter(ProductDataModel menuModel) {
+    menuModel.counter = menuModel.counter + 1;
+
+    addToCart(menuModel);
+
+    emit(CafeteriaChangeIncrementCounterSuccessState());
+  }
+
+  void decrementMenuItemCounter(ProductDataModel menuModel,context) {
+    menuModel.counter = menuModel.counter - 1;
+    removeFromCart(menuModel,context);
+    emit(CafeteriaChangeDecrementCounterSuccessState());
+  }
+
+  // MyCartModel? myCartModel;
+  List<ProductDataModel> myCartList = [];
+  Map myCart = {
+    "totalItems": 0,
+    "totalPrice": 0.0,
+    "list": [],
+  };
+
+  void addToCart(ProductDataModel menuModel) {
+    if (menuModel.counter == 1) {
+      myCartList.add(menuModel);
+    }
+    myCart["list"] = myCartList;
+    myCart["totalItems"] += 1;
+    myCart["totalPrice"] += menuModel.price;
+  }
+
+  void removeFromCart(ProductDataModel menuModel,context) {
+    if (menuModel.counter == 0) {
+      myCartList.remove(menuModel);
+    }
+    if(myCartList.isEmpty){
+      Navigator.pop(context);
+    }
+    myCart["list"] = myCartList;
+    myCart["totalItems"] -= 1;
+    myCart["totalPrice"] -= menuModel.price;
   }
 }

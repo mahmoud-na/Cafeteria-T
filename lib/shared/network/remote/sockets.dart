@@ -26,6 +26,7 @@ class Sockets {
     late StreamSubscription<Uint8List> subscription;
 
     try {
+      print('kkkkkkkkkkkkkkkkkkkkkkkk');
       final socket = await Socket.connect(
         ip,
         port,
