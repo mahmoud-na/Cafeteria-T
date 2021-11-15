@@ -6,7 +6,7 @@ class PreviousHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: const Text("PreviousHistory"),
         titleSpacing: 5.0,
@@ -15,7 +15,7 @@ class PreviousHistoryScreen extends StatelessWidget {
             Navigator.pop(context);
           },
           icon: const Icon(
-            IconBroken.Arrow___Left_2,
+            IconBroken.Arrow___Right_2,
           ),
         ),
       ),

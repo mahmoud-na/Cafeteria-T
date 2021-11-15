@@ -6,16 +6,16 @@ class MyOrderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        title: const Text("My Order"),
+        title: const Text("طلب اليوم"),
         titleSpacing: 5.0,
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
           },
           icon: const Icon(
-            IconBroken.Arrow___Left_2,
+            IconBroken.Arrow___Right_2,
           ),
         ),
       ),

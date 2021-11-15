@@ -8,34 +8,52 @@ class ProductModel {
 
 class MenuModel {
   bool? validState;
-  List<FoodModel> food = [];
-  List<BeveragesModel> beverages = [];
-  List<DessertsModel> desserts = [];
-  List<SnacksModel> snacks = [];
+  List<ProductDataModel> food = [];
+  List<ProductDataModel> beverages = [];
+  List<ProductDataModel> desserts = [];
+  List<ProductDataModel> snacks = [];
 
   MenuModel.fromJson(Map<String, dynamic> json) {
     if (json['Food'] != null) {
       json['Food'].forEach((element) {
-        food.add(FoodModel.fromJson(element));
+        food.add(ProductDataModel.fromJson(element));
       });
     }
     if (json['Beverages'] != null) {
       json['Beverages'].forEach((element) {
-        beverages.add(BeveragesModel.fromJson(element));
+        beverages.add(ProductDataModel.fromJson(element));
       });
     }
 
     if (json['Snacks'] != null) {
       json['Snacks'].forEach((element) {
-        snacks.add(SnacksModel.fromJson(element));
+        snacks.add(ProductDataModel.fromJson(element));
       });
     }
 
     if (json['Desserts'] != null) {
       json['Desserts'].forEach((element) {
-        desserts.add(DessertsModel.fromJson(element));
+        desserts.add(ProductDataModel.fromJson(element));
       });
     }
+  }
+}
+
+class ProductDataModel {
+  int? id;
+  String? name;
+  double price = 0.0;
+  String? image;
+  int counter = 0;
+  int? quantity;
+
+  ProductDataModel.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    price = json['price'];
+    image = json['image'];
+    counter = json['counter'];
+    quantity = json['quantity'];
   }
 }
 
