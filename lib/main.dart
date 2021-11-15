@@ -47,15 +47,21 @@ class MyApp extends StatelessWidget {
             ),
         ),
         BlocProvider(
-            create: (context) => CafeteriaCubit()
-              ..getMenuData().then((value) {
-                // CafeteriaCubit().getCurrentHistoryData();
-              })
-              // ..getCurrentHistoryData()
-            // ..getPreviousHistoryData()
-            // ..getMyOrderData(),
-            // ..getUserData(activationCode: "jm"),
+          create: (context) => CafeteriaCubit()
+            ..getMenuData().then(
+              (value) => CafeteriaCubit().getUserData(activationCode: 'jm').then(
+                (value) {
+                  CafeteriaCubit().getCurrentHistoryData().then(
+                    (value) {
+                      CafeteriaCubit().getPreviousHistoryData().then(
+                            (value) => CafeteriaCubit().getMyOrderData(),
+                          );
+                    },
+                  );
+                },
+              ),
             ),
+        ),
       ],
       child: BlocConsumer<AppCubit, AppStates>(
         listener: (context, state) {},
