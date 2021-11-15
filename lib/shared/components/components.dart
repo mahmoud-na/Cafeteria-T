@@ -11,7 +11,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 Widget defaultButton({
   double width = double.infinity,
-  // Color backgroundColor = defa,
   bool isUpperCase = true,
   double borderRadius = 3.0,
   required VoidCallback onPressed,
@@ -305,7 +304,6 @@ Widget shopItemBuilder({
       ),
       fallback: (context) =>
           SingleChildScrollView(
-
             physics: const BouncingScrollPhysics(),
             child: ListView.separated(
               physics: const NeverScrollableScrollPhysics(),

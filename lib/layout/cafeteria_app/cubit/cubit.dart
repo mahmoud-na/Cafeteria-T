@@ -43,8 +43,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
 
   Future<void> getMenuData() async {
     emit(CafeteriaMenuLoadingState());
-
-    SocketHelper.getData(query: "EID:$uId,DayMenu<EOF>").then((value) {
+    await SocketHelper.getData(query: "EID:$uId,DayMenu<EOF>").then((value) {
       menuModel = ProductModel.fromJson(value);
       emit(CafeteriaMenuSuccessState());
     }).catchError((error) {
@@ -55,12 +54,12 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
 
   UserModel? userModel;
 
-  void getUserData({
+  Future<void> getUserData({
     required String activationCode,
-  }) {
+  }) async {
     emit(CafeteriaUserDataLoadingState());
 
-    SocketHelper.getData(query: "EID:0,ACTCODE:$activationCode<EOF>")
+    await SocketHelper.getData(query: "EID:0,ACTCODE:$activationCode<EOF>")
         .then((value) {
       userModel = UserModel.fromJson(value);
       emit(CafeteriaUserDataSuccessState());
@@ -74,7 +73,8 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
 
   Future<void> getCurrentHistoryData() async {
     emit(CafeteriaCurrentHistoryLoadingState());
-    SocketHelper.getData(query: "EID:$uId,CurrentHistory<EOF>").then((value) {
+    await SocketHelper.getData(query: "EID:$uId,CurrentHistory<EOF>")
+        .then((value) {
       currentHistoryModel = HistoryModel.fromJson(value, "CurrentHistory");
       emit(CafeteriaCurrentHistorySuccessState());
     }).catchError((error) {
@@ -85,9 +85,9 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
 
   HistoryModel? previousHistoryModel;
 
-  void getPreviousHistoryData() {
+  Future<void> getPreviousHistoryData() async {
     emit(CafeteriaPreviousHistoryLoadingState());
-    SocketHelper.getData(
+    await SocketHelper.getData(
       query: "EID:$uId,PreviousHistory<EOF>",
     ).then((value) {
       previousHistoryModel = HistoryModel.fromJson(value, "PreviousHistory");
@@ -111,9 +111,9 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   // }
   MyOrderModel? myOrderModel;
 
-  void getMyOrderData() {
+  Future<void> getMyOrderData() async {
     emit(CafeteriaMyOrderLoadingState());
-    SocketHelper.getData(
+    await SocketHelper.getData(
       query: "EID:$uId,RequestUpdateOrder<EOF>",
     ).then((value) {
       myOrderModel = MyOrderModel.fromJson(value);
@@ -143,11 +143,11 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     });
   }
 
-  Widget shopItemRemoveIcon(var menuModel,context) {
+  Widget shopItemRemoveIcon(var menuModel, context) {
     if (menuModel.counter > 0) {
       return IconButton(
         onPressed: () {
-          decrementMenuItemCounter(menuModel,context);
+          decrementMenuItemCounter(menuModel, context);
         },
         icon: const Icon(Icons.remove_circle_outline,
             size: 40.0, color: Colors.redAccent),
@@ -202,9 +202,9 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     emit(CafeteriaChangeIncrementCounterSuccessState());
   }
 
-  void decrementMenuItemCounter(ProductDataModel menuModel,context) {
+  void decrementMenuItemCounter(ProductDataModel menuModel, context) {
     menuModel.counter = menuModel.counter - 1;
-    removeFromCart(menuModel,context);
+    removeFromCart(menuModel, context);
     emit(CafeteriaChangeDecrementCounterSuccessState());
   }
 
@@ -225,11 +225,11 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     myCart["totalPrice"] += menuModel.price;
   }
 
-  void removeFromCart(ProductDataModel menuModel,context) {
+  void removeFromCart(ProductDataModel menuModel, context) {
     if (menuModel.counter == 0) {
       myCartList.remove(menuModel);
     }
-    if(myCartList.isEmpty){
+    if (myCartList.isEmpty) {
       Navigator.pop(context);
     }
     myCart["list"] = myCartList;
