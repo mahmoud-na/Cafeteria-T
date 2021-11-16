@@ -10,12 +10,12 @@ class LoginDataModel {
   String? activationValid;
   String? name;
   String? userId;
-  String? profileImage;
-  String? coverImage;
+  String profileImage = "";
+  String coverImage = "";
 
   LoginDataModel.fromJson(Map<String, dynamic> json) {
     activationValid = json['activationValid'];
-    name = json['name'];
-    userId = json['userId'];
+    name = json['Name'];
+    userId = json['ID'];
   }
 }

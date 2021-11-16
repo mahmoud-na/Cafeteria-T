@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/states.dart';
 import 'package:cafeteriat/modules/cafeteria_app/about/about_screen.dart';
@@ -17,16 +18,17 @@ class MyDrawer extends StatelessWidget {
     return BlocConsumer<CafeteriaCubit, CafeteriaStates>(
       listener: (context, state) {},
       builder: (context, state) {
+        var cubit = CafeteriaCubit.get(context);
         return Drawer(
           child: ListView(
             children: [
-              myDrawerHeaderBuilder(context),
+              myDrawerHeaderBuilder(context,cubit),
               const SizedBox(
                 height: 7.0,
               ),
               Center(
-                child: Text(
-                  "جوزيف مدحت سليم",
+                child: Text("${cubit.userModel?.data?.name}"
+                ,
                   style: Theme.of(context).textTheme.bodyText1,
                 ),
               ),
@@ -38,7 +40,7 @@ class MyDrawer extends StatelessWidget {
                 title: 'بياناتي',
                 icon: const Icon(Icons.person),
                 onTap: () {
-                  navigateTo(context, const ProfileScreen());
+                  navigateTo(context, profileScreen());
                 },
               ),
               myDivider(),
@@ -106,7 +108,7 @@ class MyDrawer extends StatelessWidget {
     );
   }
 
-  Widget myDrawerHeaderBuilder(context) => SizedBox(
+  Widget myDrawerHeaderBuilder(context,var cubit) => SizedBox(
         width: double.infinity,
         height: 220.0,
         child: Stack(
@@ -114,25 +116,118 @@ class MyDrawer extends StatelessWidget {
           children: [
             Align(
               alignment: AlignmentDirectional.topCenter,
-              child: Container(
-                height: 160.0,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: AssetImage('assets/images/DrawerBackground.jpg'),
+                child: SizedBox(
+                  height: 160.0,
+                  child: CachedNetworkImage(
+                    imageUrl: cubit.userModel!.data!.coverImage,
+                    imageBuilder: (context, imageProvider) =>
+                        Container(
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: imageProvider,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                    placeholder: (context, url) => Container(
+                      height: 131.0,
+                      width: 131.0,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 4,
+                      ),
+                      decoration: const BoxDecoration(
+                        color: Colors.black12,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(
+                            10.0,
+                          ),
+                          topRight: Radius.circular(
+                            10.0,
+                          ),
+                        ),
+                        image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: AssetImage(
+                              'assets/images/DrawerBackground.jpg'),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+
             ),
             CircleAvatar(
               radius: 54.0,
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              child: const CircleAvatar(
-                radius: 50.0,
-                backgroundImage: AssetImage('assets/images/person.png'),
-              ),
+              backgroundColor:
+              Theme.of(context).scaffoldBackgroundColor,
+                child: CachedNetworkImage(
+                  imageUrl: cubit.userModel!.data!.profileImage,
+                  imageBuilder: (context, imageProvider) => Container(
+                    height: 100.0,
+                    width: 100.0,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  placeholder: (context, url) => Container(
+                    height: 104.0,
+                    width: 104.0,
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 4,
+                    ),
+                    decoration: const BoxDecoration(
+                      color: Colors.black12,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    width: 100.0,
+                    height: 100.0,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Image(
+                      image: AssetImage('assets/images/person.png'),
+                    ),
+                  ),
+                ),
             ),
           ],
         ),
+        // Stack(
+        //   alignment: AlignmentDirectional.bottomCenter,
+        //   children: [
+        //     Align(
+        //       alignment: AlignmentDirectional.topCenter,
+        //       child: Container(
+        //         height: 160.0,
+        //         decoration: const BoxDecoration(
+        //           image: DecorationImage(
+        //             fit: BoxFit.cover,
+        //             image: AssetImage('assets/images/DrawerBackground.jpg'),
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //     CircleAvatar(
+        //       radius: 54.0,
+        //       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        //       child: const CircleAvatar(
+        //         radius: 50.0,
+        //         backgroundImage: AssetImage('assets/images/person.png'),
+        //       ),
+        //     ),
+        //   ],
+        // ),
       );
 }
