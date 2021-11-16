@@ -82,3 +82,33 @@ class CafeteriaChangeDecrementCounterSuccessState extends CafeteriaStates {}
 class CafeteriaChangeIncrementCounterErrorState extends CafeteriaStates {}
 class CafeteriaChangeDecrementCounterErrorState extends CafeteriaStates {}
 
+class CafeteriaChangeProfileImageSuccessState extends CafeteriaStates {}
+
+class CafeteriaChangeProfileImageErrorState extends CafeteriaStates {}
+
+class CafeteriaChangeCoverImageSuccessState extends CafeteriaStates {}
+
+class CafeteriaChangeCoverImageErrorState extends CafeteriaStates {}
+
+
+class CafeteriaUploadProfileImageToFirebaseSuccessState extends CafeteriaStates {}
+class CafeteriaUploadProfileImageToFirebaseErrorState extends CafeteriaStates {
+  final String error;
+  CafeteriaUploadProfileImageToFirebaseErrorState(this.error);
+}
+
+
+
+class CafeteriaUploadCoverImageToFirebaseSuccessState extends CafeteriaStates {}
+class CafeteriaUploadCoverImageToFirebaseErrorState extends CafeteriaStates {
+  final String error;
+  CafeteriaUploadCoverImageToFirebaseErrorState(this.error);
+}
+
+
+
+class CafeteriaRemoveImageSuccessState extends CafeteriaStates {}
+class CafeteriaRemoveImageErrorState extends CafeteriaStates {
+  final String error;
+  CafeteriaRemoveImageErrorState(this.error);
+}

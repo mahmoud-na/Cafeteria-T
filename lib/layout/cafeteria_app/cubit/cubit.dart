@@ -1,22 +1,23 @@
+import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/states.dart';
 import 'package:cafeteriat/models/cafeteria_app/history_model.dart';
-import 'package:cafeteriat/models/cafeteria_app/my_cart_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/my_order_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/product_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/submit_order_response_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/user_model.dart';
-import 'package:cafeteriat/modules/cafeteria_app/checkout/checkout_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/dessert/desserts_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/drinks/drinks_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/food/food_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/snacks/snacks_screen.dart';
 import 'package:cafeteriat/shared/components/constants.dart';
+import 'package:cafeteriat/shared/network/local/cache_helper.dart';
 import 'package:cafeteriat/shared/network/remote/socket_helper.dart';
-import 'package:cafeteriat/shared/network/remote/sockets.dart';
 import 'package:cafeteriat/shared/styles/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class CafeteriaCubit extends Cubit<CafeteriaStates> {
   CafeteriaCubit() : super(CafeteriaInitialState());
@@ -24,6 +25,8 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   static CafeteriaCubit get(context) => BlocProvider.of(context);
   bool isCartEmpty = true;
   int navBarCurrentIndex = 0;
+
+  var platFormType = Platform.operatingSystem;
 
   List<Widget> screens = [
     const FoodScreen(),
@@ -45,6 +48,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     emit(CafeteriaMenuLoadingState());
     await SocketHelper.getData(query: "EID:$uId,DayMenu<EOF>").then((value) {
       menuModel = ProductModel.fromJson(value);
+
       emit(CafeteriaMenuSuccessState());
     }).catchError((error) {
       print(error.toString());
@@ -58,10 +62,17 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     required String activationCode,
   }) async {
     emit(CafeteriaUserDataLoadingState());
-
     await SocketHelper.getData(query: "EID:0,ACTCODE:$activationCode<EOF>")
         .then((value) {
       userModel = UserModel.fromJson(value);
+      uId = userModel!.data!.userId!;
+      if (CacheHelper.getData(key: 'profileImageUrl') != null) {
+        userModel!.data!.profileImage =
+            CacheHelper.getData(key: 'profileImageUrl');
+      }
+      if (CacheHelper.getData(key: 'coverImageUrl') != null) {
+        userModel!.data!.coverImage = CacheHelper.getData(key: 'coverImageUrl');
+      }
       emit(CafeteriaUserDataSuccessState());
     }).catchError((error) {
       print(error.toString());
@@ -153,7 +164,6 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
             size: 40.0, color: Colors.redAccent),
       );
     } else {
-      // emit(CafeteriaChangeDecrementCounterErrorState());
       return const IconButton(
           onPressed: null,
           icon: Icon(
@@ -177,7 +187,6 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
         ),
       );
     } else {
-      // emit(CafeteriaChangeIncrementCounterErrorState());
       return const IconButton(
         onPressed: null,
         icon: Icon(
@@ -235,5 +244,143 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     myCart["list"] = myCartList;
     myCart["totalItems"] -= 1;
     myCart["totalPrice"] -= menuModel.price;
+  }
+
+  void getData() async {
+    await getUserData(activationCode: "jm");
+    await getMenuData();
+    await getPreviousHistoryData();
+    await getCurrentHistoryData();
+  }
+
+  String getQrCodeDataReady({
+    required String name,
+    required String userId,
+  }) {
+    List<dynamic> asciiArray = "Name is:$name \nUserID is:$userId".codeUnits;
+    List<int> asciiArrayAfterMod = [];
+    asciiArray.forEach((value) {
+      asciiArrayAfterMod.add(((value + 5) * 5) - 55);
+    });
+    final String qrData = String.fromCharCodes(asciiArrayAfterMod);
+    return qrData;
+  }
+
+  final imagePicker = ImagePicker();
+  late File pickedImagePath;
+
+  takeImageFromCamera({
+    required bool isProfilePicture,
+  }) async {
+    final pickedImage = await imagePicker.pickImage(
+      source: ImageSource.camera,
+      preferredCameraDevice: CameraDevice.front,
+    );
+    if (pickedImage != null) {
+      pickedImagePath = File(pickedImage.path);
+      await uploadFileToFirebase(
+        newImage: pickedImagePath,
+        isProfilePicture: isProfilePicture,
+      );
+    } else {
+      emit(CafeteriaChangeProfileImageErrorState());
+    }
+  }
+
+  chooseImageFromGallery({
+    required bool isProfilePicture,
+  }) async {
+    final pickedImage = await imagePicker.pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedImage != null) {
+      pickedImagePath = File(pickedImage.path);
+      uploadFileToFirebase(
+        newImage: pickedImagePath,
+        isProfilePicture: isProfilePicture,
+      ).then(
+        (value) => emit(CafeteriaChangeCoverImageSuccessState()),
+      );
+    } else {
+      emit(CafeteriaChangeCoverImageErrorState());
+    }
+  }
+
+  deleteImage({
+    required bool isProfilePicture,
+  }) {
+    if (isProfilePicture) {
+      FirebaseStorage.instance
+          .refFromURL(userModel!.data!.profileImage)
+          .delete()
+          .then((value) {
+            CacheHelper.removeData(key: 'profileImageUrl');
+            userModel!.data!.profileImage = '';
+          })
+          .then((value) => emit(CafeteriaRemoveImageSuccessState()))
+          .catchError((error) {
+            print(error.toString());
+            emit(CafeteriaRemoveImageErrorState(error.toString()));
+          });
+    } else {
+      FirebaseStorage.instance
+          .refFromURL(userModel!.data!.coverImage)
+          .delete()
+          .then((value) {
+            CacheHelper.removeData(key: 'coverImageUrl');
+            userModel!.data!.coverImage = '';
+          })
+          .then((value) => emit(CafeteriaRemoveImageSuccessState()))
+          .catchError((error) {
+            print(error.toString());
+            emit(CafeteriaRemoveImageErrorState(error.toString()));
+          });
+    }
+  }
+
+  Future uploadFileToFirebase({
+    required File newImage,
+    required bool isProfilePicture,
+  }) async {
+    FirebaseStorage storageReference = FirebaseStorage.instance;
+
+    if (isProfilePicture) {
+      Reference ref = storageReference.ref().child(
+            'ProfilesPics/${userModel!.data!.name}:${userModel!.data!.userId}',
+          );
+      UploadTask uploadTask = ref.putFile(newImage);
+      await uploadTask.then((res) {
+        res.ref.getDownloadURL().then((fileURL) {
+          userModel!.data!.profileImage = fileURL;
+
+          CacheHelper.saveData(key: 'profileImageUrl', value: fileURL).then(
+            (value) {
+              emit(CafeteriaUploadProfileImageToFirebaseSuccessState());
+            },
+          );
+        });
+      }).catchError((error) {
+        print(error.toString());
+        emit(CafeteriaUploadProfileImageToFirebaseErrorState(error.toString()));
+      });
+    } else {
+      Reference ref = storageReference.ref().child(
+            'drawerBGimages/${userModel!.data!.name}:${userModel!.data!.userId}',
+          );
+      UploadTask uploadTask = ref.putFile(newImage);
+      uploadTask.then((res) {
+        res.ref.getDownloadURL().then((fileURL) {
+          userModel!.data!.coverImage = fileURL;
+          CacheHelper.saveData(key: 'coverImageUrl', value: fileURL).then(
+            (value) {
+              emit(CafeteriaUploadCoverImageToFirebaseSuccessState());
+            },
+          );
+        });
+      }).catchError((error) {
+        print(error.toString());
+        emit(CafeteriaUploadCoverImageToFirebaseErrorState(error.toString()));
+      });
+    }
   }
 }

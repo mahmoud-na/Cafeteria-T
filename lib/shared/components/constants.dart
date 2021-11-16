@@ -1,4 +1,4 @@
-String? uId = "872";
+String? uId;
 void printFullText(String text) {
   final pattern = RegExp('.{1,800}');
 
