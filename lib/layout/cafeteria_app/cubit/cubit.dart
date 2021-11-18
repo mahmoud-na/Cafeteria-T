@@ -103,7 +103,8 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   }
 
   List<HistoryDataModel> historySorting(
-      List<HistoryDataModel> tmpHistorySorting) {
+    List<HistoryDataModel> tmpHistorySorting,
+  ) {
     var tmp;
     for (int i = 0; i < tmpHistorySorting.length; i++) {
       for (int j = 0; j < tmpHistorySorting.length - 1; j++) {
@@ -206,16 +207,64 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
 
   SubmitOrderResponseModel? submitOrderResponseModel;
 
-  void postMyOrderData({
-    required String order,
-    required String name,
-    required double totalCost,
-  }) {
+  String sendOrder({required List<ProductDataModel> myCartList}) {
+    String order = '';
+    for (int index = 0; index < myCartList.length; index++) {
+      if (myCartList[index].id! >= 2000 && myCartList[index].id! < 3000) {
+        order = order +
+            'LID:${myCartList[index].id!},LQty:${myCartList[index].counter}';
+        if (index != myCartList.length - 1) {
+          order = order + ",";
+        }
+      } else if (myCartList[index].id! >= 3000 &&
+          myCartList[index].id! < 4000) {
+        order = order +
+            'BID:${myCartList[index].id!},BQty:${myCartList[index].counter}';
+        if (index != myCartList.length - 1) {
+          order = order + ",";
+        }
+      } else if (myCartList[index].id! >= 4000 &&
+          myCartList[index].id! < 5000) {
+        order = order +
+            'DID:${myCartList[index].id!},DQty:${myCartList[index].counter}';
+        if (index != myCartList.length - 1) {
+          order = order + ",";
+        }
+      } else if (myCartList[index].id! >= 5000 &&
+          myCartList[index].id! < 6000) {
+        order = order +
+            'SID:${myCartList[index].id!},SQty:${myCartList[index].counter}';
+        if (index != myCartList.length - 1) {
+          order = order + ",";
+        }
+      } else {
+        print("لا يمكن اتمام االطلب برجاء المحاولة مرة اخرى");
+      }
+    }
+    return order;
+  }
+
+  void postMyOrderData(BuildContext context) {
     emit(CafeteriaPostMyOrderLoadingState());
     SocketHelper.postData(
-      query: "EID:$uId,Order,$order,EName:$name,TCost:$totalCost<EOF>",
+      query: "EID:$uId,Order,${sendOrder(
+        myCartList: myCartDataModel!.products,
+      )},EName:${userModel!.data!.name},TCost:${myCartDataModel!.totalPrice}<EOF>",
     ).then((value) {
       submitOrderResponseModel = SubmitOrderResponseModel.fromJson(value);
+      print(submitOrderResponseModel!.data!.orderNumber);
+      print(submitOrderResponseModel!.data!.errMsg);
+      print(submitOrderResponseModel!.data!.orderValid);
+
+      if (submitOrderResponseModel!.data!.orderValid == 'true') {
+        CacheHelper.removeData(key: 'savedMyCartString').then((value) async {
+          await getMenuData().then(
+            (value) => emit(CafeteriaPostMyOrderSuccessState()),
+          );
+        });
+        clearMyCart();
+        Navigator.pop(context);
+      }
       emit(CafeteriaPostMyOrderSuccessState());
     }).catchError((error) {
       print(error.toString());
@@ -298,12 +347,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
         ),
       );
     } else {
-      Map<String, dynamic> myCart = {
-        "totalItems": 0,
-        "totalPrice": 0.0,
-        "list": [],
-      };
-      myCartDataModel = MyCartModel.fromJson(myCart);
+      clearMyCart();
     }
   }
 
@@ -321,7 +365,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   void removeFromCart(ProductDataModel menuModel, BuildContext context) {
     if (menuModel.counter == 0) {
       myCartDataModel!.products.remove(menuModel);
-      if(myCartDataModel!.products.isEmpty){
+      if (myCartDataModel!.products.isEmpty) {
         Navigator.of(context).maybePop();
       }
     }
@@ -333,7 +377,16 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     print(savedMyCartString);
   }
 
-  void getData() async {
+  void clearMyCart() {
+    Map<String, dynamic> myCart = {
+      "totalItems": 0,
+      "totalPrice": 0.0,
+      "list": [],
+    };
+    myCartDataModel = MyCartModel.fromJson(myCart);
+  }
+
+  void getAppData() async {
     await getUserData(activationCode: "jm");
     await getMyCartData();
     await getMenuData();

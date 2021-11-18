@@ -61,6 +61,9 @@ ThemeData darkTheme = ThemeData(
       ),
     ),
   ),
+  floatingActionButtonTheme: const FloatingActionButtonThemeData(
+    backgroundColor: Colors.amber,
+  ),
 );
 ThemeData lightTheme = ThemeData(
   primarySwatch: defaultColor,
@@ -126,5 +129,8 @@ ThemeData lightTheme = ThemeData(
         ),
       ),
     ),
+  ),
+  floatingActionButtonTheme: const FloatingActionButtonThemeData(
+    backgroundColor: Colors.amber,
   ),
 );
