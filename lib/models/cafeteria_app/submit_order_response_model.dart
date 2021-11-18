@@ -15,6 +15,6 @@ class SubmitOrderResponseDataModel {
   SubmitOrderResponseDataModel.fromJson(Map<String, dynamic> json) {
     orderValid = json['OrderValid'];
     errMsg = json['errMsg'];
-    orderNumber = json['OrderNum'];
+    orderNumber = json['orderNum'];
   }
 }

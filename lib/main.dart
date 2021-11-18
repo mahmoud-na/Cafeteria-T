@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
             ),
         ),
         BlocProvider(
-          create: (context) => CafeteriaCubit()..getData(),
+          create: (context) => CafeteriaCubit()..getAppData(),
         ),
       ],
       child: BlocConsumer<AppCubit, AppStates>(

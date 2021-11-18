@@ -63,7 +63,9 @@ class CheckOutScreen extends StatelessWidget {
                     20.0,
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  cubit.postMyOrderData(context);
+                },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
