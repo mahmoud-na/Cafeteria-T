@@ -41,4 +41,8 @@ class CacheHelper {
   static Future<bool> removeData({required key,}) async {
     return await sharedPreferences.remove(key);
   }
+
+  static Future<bool> removeAllData() async {
+    return await sharedPreferences.clear();
+  }
 }

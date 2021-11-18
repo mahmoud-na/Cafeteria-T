@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/states.dart';
 import 'package:cafeteriat/models/cafeteria_app/history_model.dart';
+import 'package:cafeteriat/models/cafeteria_app/my_cart_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/my_order_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/product_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/submit_order_response_model.dart';
@@ -10,6 +12,7 @@ import 'package:cafeteriat/modules/cafeteria_app/dessert/desserts_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/drinks/drinks_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/food/food_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/snacks/snacks_screen.dart';
+import 'package:cafeteriat/shared/components/components.dart';
 import 'package:cafeteriat/shared/components/constants.dart';
 import 'package:cafeteriat/shared/network/local/cache_helper.dart';
 import 'package:cafeteriat/shared/network/remote/socket_helper.dart';
@@ -19,11 +22,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
+import '../cafeteria_app_layout.dart';
+
 class CafeteriaCubit extends Cubit<CafeteriaStates> {
   CafeteriaCubit() : super(CafeteriaInitialState());
 
   static CafeteriaCubit get(context) => BlocProvider.of(context);
-  bool isCartEmpty = true;
+  bool isMyOrder = true;
   int navBarCurrentIndex = 0;
 
   var platFormType = Platform.operatingSystem;
@@ -42,13 +47,30 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     'حلويات',
   ];
 
+  void findAndReplaceMenu({
+    required List<ProductDataModel> list,
+  }) {
+    for (int i = 0; i < list.length; i++) {
+      for (int j = 0; j < myCartDataModel!.products.length; j++) {
+        if (list[i].id == myCartDataModel!.products[j].id) {
+          list[i] = myCartDataModel!.products[j];
+        }
+      }
+    }
+  }
+
   ProductModel? menuModel;
 
   Future<void> getMenuData() async {
     emit(CafeteriaMenuLoadingState());
     await SocketHelper.getData(query: "EID:$uId,DayMenu<EOF>").then((value) {
       menuModel = ProductModel.fromJson(value);
-
+      if (myCartDataModel!.totalItems != 0) {
+        findAndReplaceMenu(list: menuModel!.data!.food);
+        findAndReplaceMenu(list: menuModel!.data!.snacks);
+        findAndReplaceMenu(list: menuModel!.data!.beverages);
+        findAndReplaceMenu(list: menuModel!.data!.desserts);
+      }
       emit(CafeteriaMenuSuccessState());
     }).catchError((error) {
       print(error.toString());
@@ -80,6 +102,51 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     });
   }
 
+  List<HistoryDataModel> historySorting(
+      List<HistoryDataModel> tmpHistorySorting) {
+    var tmp;
+    for (int i = 0; i < tmpHistorySorting.length; i++) {
+      for (int j = 0; j < tmpHistorySorting.length - 1; j++) {
+        if (int.parse(tmpHistorySorting[j].dateTime!.substring(4, 6)) <
+            int.parse(tmpHistorySorting[j + 1].dateTime!.substring(4, 6))) {
+          tmp = tmpHistorySorting[j];
+          tmpHistorySorting[j] = tmpHistorySorting[j + 1];
+          tmpHistorySorting[j + 1] = tmp;
+        } else if (int.parse(tmpHistorySorting[j].dateTime!.substring(4, 6)) ==
+            int.parse(tmpHistorySorting[j + 1].dateTime!.substring(4, 6))) {
+          if (int.parse(tmpHistorySorting[j].dateTime!.substring(12, 14)) <
+              int.parse(tmpHistorySorting[j + 1].dateTime!.substring(12, 14))) {
+            tmp = tmpHistorySorting[j];
+            tmpHistorySorting[j] = tmpHistorySorting[j + 1];
+            tmpHistorySorting[j + 1] = tmp;
+          } else if (int.parse(
+                  tmpHistorySorting[j].dateTime!.substring(12, 14)) ==
+              int.parse(tmpHistorySorting[j + 1].dateTime!.substring(12, 14))) {
+            if (int.parse(tmpHistorySorting[j].dateTime!.substring(15, 17)) <
+                int.parse(
+                    tmpHistorySorting[j + 1].dateTime!.substring(15, 17))) {
+              tmp = tmpHistorySorting[j];
+              tmpHistorySorting[j] = tmpHistorySorting[j + 1];
+              tmpHistorySorting[j + 1] = tmp;
+            } else if (int.parse(
+                    tmpHistorySorting[j].dateTime!.substring(15, 17)) ==
+                int.parse(
+                    tmpHistorySorting[j + 1].dateTime!.substring(15, 17))) {
+              if (int.parse(tmpHistorySorting[j].dateTime!.substring(18, 20)) <
+                  int.parse(
+                      tmpHistorySorting[j + 1].dateTime!.substring(18, 20))) {
+                tmp = tmpHistorySorting[j];
+                tmpHistorySorting[j] = tmpHistorySorting[j + 1];
+                tmpHistorySorting[j + 1] = tmp;
+              }
+            }
+          }
+        }
+      }
+    }
+    return tmpHistorySorting;
+  }
+
   HistoryModel? currentHistoryModel;
 
   Future<void> getCurrentHistoryData() async {
@@ -87,6 +154,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     await SocketHelper.getData(query: "EID:$uId,CurrentHistory<EOF>")
         .then((value) {
       currentHistoryModel = HistoryModel.fromJson(value, "CurrentHistory");
+      currentHistoryModel!.data = historySorting(currentHistoryModel!.data);
       emit(CafeteriaCurrentHistorySuccessState());
     }).catchError((error) {
       print(error.toString());
@@ -102,6 +170,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       query: "EID:$uId,PreviousHistory<EOF>",
     ).then((value) {
       previousHistoryModel = HistoryModel.fromJson(value, "PreviousHistory");
+      previousHistoryModel!.data = historySorting(previousHistoryModel!.data);
       emit(CafeteriaPreviousHistorySuccessState());
     }).catchError((error) {
       print(error.toString());
@@ -217,37 +286,56 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     emit(CafeteriaChangeDecrementCounterSuccessState());
   }
 
-  // MyCartModel? myCartModel;
-  List<ProductDataModel> myCartList = [];
-  Map myCart = {
-    "totalItems": 0,
-    "totalPrice": 0.0,
-    "list": [],
-  };
+  MyCartModel? myCartDataModel;
+
+  Future<void> getMyCartData() async {
+    if (CacheHelper.getData(key: "savedMyCartString") != null) {
+      myCartDataModel = MyCartModel.fromJson(
+        jsonDecode(
+          CacheHelper.getData(
+            key: "savedMyCartString",
+          ),
+        ),
+      );
+    } else {
+      Map<String, dynamic> myCart = {
+        "totalItems": 0,
+        "totalPrice": 0.0,
+        "list": [],
+      };
+      myCartDataModel = MyCartModel.fromJson(myCart);
+    }
+  }
 
   void addToCart(ProductDataModel menuModel) {
     if (menuModel.counter == 1) {
-      myCartList.add(menuModel);
+      myCartDataModel!.products.add(menuModel);
     }
-    myCart["list"] = myCartList;
-    myCart["totalItems"] += 1;
-    myCart["totalPrice"] += menuModel.price;
+    myCartDataModel!.totalItems = myCartDataModel!.totalItems + 1;
+    myCartDataModel!.totalPrice = myCartDataModel!.totalPrice + menuModel.price;
+    String savedMyCartString = json.encode(myCartDataModel!.toMap());
+    CacheHelper.saveData(key: 'savedMyCartString', value: savedMyCartString);
+    print(savedMyCartString);
   }
 
-  void removeFromCart(ProductDataModel menuModel, context) {
+  void removeFromCart(ProductDataModel menuModel, BuildContext context) {
     if (menuModel.counter == 0) {
-      myCartList.remove(menuModel);
+      myCartDataModel!.products.remove(menuModel);
+      if(myCartDataModel!.products.isEmpty){
+        Navigator.of(context).maybePop();
+      }
     }
-    if (myCartList.isEmpty) {
-      Navigator.pop(context);
-    }
-    myCart["list"] = myCartList;
-    myCart["totalItems"] -= 1;
-    myCart["totalPrice"] -= menuModel.price;
+
+    myCartDataModel!.totalItems = myCartDataModel!.totalItems - 1;
+    myCartDataModel!.totalPrice = myCartDataModel!.totalPrice - menuModel.price;
+    String savedMyCartString = json.encode(myCartDataModel!.toMap());
+    CacheHelper.saveData(key: 'savedMyCartString', value: savedMyCartString);
+    print(savedMyCartString);
   }
 
   void getData() async {
     await getUserData(activationCode: "jm");
+    await getMyCartData();
     await getMenuData();
     await getPreviousHistoryData();
     await getCurrentHistoryData();

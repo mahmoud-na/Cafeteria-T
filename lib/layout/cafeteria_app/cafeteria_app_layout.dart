@@ -29,7 +29,7 @@ class CafeteriaHomeScreen extends StatelessWidget {
                 cubit.appBarTitles[cubit.navBarCurrentIndex],
               ),
               actions: [
-                if (cubit.isCartEmpty)
+                if (cubit.isMyOrder)
                   IconButton(
                     onPressed: () {
                       navigateTo(
@@ -41,14 +41,6 @@ class CafeteriaHomeScreen extends StatelessWidget {
                       Icons.shopping_cart,
                     ),
                   ),
-                IconButton(
-                  onPressed: () {
-                    AppCubit.get(context).changeAppThemeMode();
-                  },
-                  icon: const Icon(
-                    Icons.dark_mode,
-                  ),
-                ),
                 IconButton(
                   onPressed: () {
                     navigateTo(
@@ -108,7 +100,7 @@ class CafeteriaHomeScreen extends StatelessWidget {
                 currentIndex: cubit.navBarCurrentIndex,
               ),
             ),
-            floatingActionButton: cubit.myCart["list"].isNotEmpty
+            floatingActionButton: ( cubit.myCartDataModel !=null && cubit.myCartDataModel!.totalItems != 0)
                 ? SizedBox(
                     height: 60.0,
                     width: 60.0,

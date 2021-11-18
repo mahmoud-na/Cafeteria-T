@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/states.dart';
+import 'package:cafeteriat/models/cafeteria_app/history_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/product_model.dart';
+import 'package:cafeteriat/modules/cafeteria_app/current_history_order_details/current_history_order_details_screen.dart';
 import 'package:cafeteriat/shared/styles/colors.dart';
 import 'package:cafeteriat/shared/styles/icon_broken.dart';
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
@@ -97,7 +99,6 @@ Widget defaultListTile({
   required Function() onTap,
 }) =>
     ListTile(
-
       title: Text(
         title,
       ),
@@ -105,8 +106,7 @@ Widget defaultListTile({
       onTap: onTap,
     );
 
-Widget myDivider() =>
-    Padding(
+Widget myVDivider() => Padding(
       padding: const EdgeInsets.symmetric(
         vertical: 5.0,
         horizontal: 20.0,
@@ -118,15 +118,25 @@ Widget myDivider() =>
       ),
     );
 
+Widget myHDivider() => Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: 5.0,
+      ),
+      child: Container(
+        width: 0.6,
+        height: double.infinity,
+        color: defaultColor,
+      ),
+    );
+
 void navigateTo(context, Widget widget) {
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) =>
-          Directionality(
-            textDirection: TextDirection.rtl,
-            child: widget,
-          ),
+      builder: (context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: widget,
+      ),
     ),
   );
 }
@@ -137,7 +147,7 @@ void navigateAndReplace(context, Widget widget) {
       MaterialPageRoute(
         builder: (context) => widget,
       ),
-          (route) => false);
+      (route) => false);
 }
 
 void showToast({
@@ -199,7 +209,6 @@ Widget shopItem({
               child: Card(
                 clipBehavior: Clip.antiAliasWithSaveLayer,
                 elevation: 15.0,
-
                 margin: const EdgeInsets.all(
                   8.0,
                 ),
@@ -208,26 +217,22 @@ Widget shopItem({
                   children: [
                     CachedNetworkImage(
                       key: UniqueKey(),
-                      imageUrl:
-                      menuModel.image,
+                      imageUrl: menuModel.image,
                       height: 150.0,
                       width: 150.0,
-                      imageBuilder:
-                          (context, imageProvider) =>
-                          Container(
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: imageProvider,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                      imageBuilder: (context, imageProvider) => Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: imageProvider,
+                            fit: BoxFit.cover,
                           ),
+                        ),
+                      ),
                       placeholder: (context, url) {
                         return Container(
                           decoration: BoxDecoration(
                             color: Colors.black12,
-                            borderRadius:
-                            BorderRadius.circular(5.0),
+                            borderRadius: BorderRadius.circular(5.0),
                           ),
                         );
                       },
@@ -264,7 +269,9 @@ Widget shopItem({
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Expanded(child: cubit.shopItemAddIcon(menuModel)),
+                              Expanded(
+                                child: cubit.shopItemAddIcon(menuModel),
+                              ),
                               Container(
                                 alignment: Alignment.center,
                                 width: 43.0,
@@ -277,7 +284,8 @@ Widget shopItem({
                                 ),
                               ),
                               Expanded(
-                                  child: cubit.shopItemRemoveIcon(menuModel,context)),
+                                  child: cubit.shopItemRemoveIcon(
+                                      menuModel, context)),
                             ],
                           ),
                         ],
@@ -295,27 +303,206 @@ Widget shopItem({
 Widget shopItemBuilder({
   required var menuModel,
   required var state,
-}) =>
-    ConditionalBuilder(
-      condition: state is CafeteriaMenuLoadingState ||
-          state is CafeteriaMenuErrorState,
-      builder: (context) =>
-      const Center(
+}) {
+  return ConditionalBuilder(
+      condition: menuModel != null,
+      builder: (context) => SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: ListView.separated(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemBuilder: (context, index) => shopItem(
+            menuModel: menuModel[index],
+          ),
+          separatorBuilder: (context, index) => myVDivider(),
+          itemCount: menuModel.length,
+        ),
+      ),
+      fallback: (context) => const Center(
         child: CircularProgressIndicator(),
       ),
-      fallback: (context) =>
-          SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: ListView.separated(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemBuilder: (context, index) =>
-                  shopItem(
-                    menuModel: menuModel[index],
-                  ),
-              separatorBuilder: (context, index) => myDivider(),
-              itemCount: menuModel.length,
+    );
+}
+
+String dateFormatting(HistoryDataModel historyModel) {
+  dateFormattingHelper(
+      int startChar, int endChar, HistoryDataModel historyModel) {
+    return int.parse(historyModel.dateTime!.substring(startChar, endChar));
+  }
+
+  String formattedDate =
+      "${historyModel.dateTime!.substring(0, 3)} ${dateFormattingHelper(4, 6, historyModel)}, ${dateFormattingHelper(12, 14, historyModel) > 12 ? dateFormattingHelper(12, 14, historyModel) - 12 : dateFormattingHelper(12, 14, historyModel)}${historyModel.dateTime!.substring(14, 17)}";
+  return formattedDate;
+}
+
+Widget historyItem({
+  required HistoryDataModel? historyModel,
+  required int index,
+}) =>
+    BlocConsumer<CafeteriaCubit, CafeteriaStates>(
+      listener: (context, state) {},
+      builder: (context, state) {
+        return GestureDetector(
+          onTap: () {
+            if (historyModel!.payType == 'Prepaid') {
+              navigateTo(
+                  context,
+                  CurrentHistoryOrderDetailsScreen(
+                    historyOrderDetailsModel: historyModel,
+                  ));
+            }
+          },
+          child: SizedBox(
+            child: Card(
+              clipBehavior: Clip.antiAliasWithSaveLayer,
+              elevation: 7.0,
+              margin: const EdgeInsets.all(
+                8.0,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      dateFormatting(historyModel!),
+                      style: Theme.of(context).textTheme.bodyText1,
+                    ),
+                    myVDivider(),
+                    if (historyModel.orderNumber != null)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "رقم الطلب: ",
+                          ),
+                          Text(
+                            "${historyModel.orderNumber}",
+                          ),
+                        ],
+                      ),
+                    Row(
+                      children: [
+                        const Text("السعر الكلي: "),
+                        const SizedBox(
+                          width: 10.0,
+                        ),
+                        Text("${historyModel.price}"),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 10.0,
+                    ),
+                    Row(
+                      children: [
+                        const Text("طريقة الدفع: "),
+                        const SizedBox(
+                          width: 10.0,
+                        ),
+                        historyModel.payType == "Prepaid"
+                            ? const Text("دفع مسبق")
+                            : const Text("دفع عند الإستلام"),
+                        if (historyModel.payType == "Prepaid")
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: const [
+                                Text(
+                                  "تفاصيل الطلب",
+                                ),
+                                Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
+        );
+      },
     );
 
+Widget historyItemBuilder({
+  required List<HistoryDataModel>? historyModel,
+  required var state,
+}) =>
+    ConditionalBuilder(
+      condition: historyModel != null,
+      builder: (context) => SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: ListView.separated(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemBuilder: (context, index) => historyItem(
+            historyModel: historyModel![index],
+            index: index,
+          ),
+          separatorBuilder: (context, index) => myVDivider(),
+          itemCount: historyModel!.length,
+        ),
+      ),
+      fallback: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+Widget historyOrderDetailsItem(
+        {required HistoryOrdersModel? historyOrderDetailsListModel}) =>
+    Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Center(
+            child: Text(
+              "${historyOrderDetailsListModel!.name}",
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Center(
+            child: Text(
+              "${historyOrderDetailsListModel.counter}",
+            ),
+          ),
+        ),
+        Expanded(
+          child: Center(
+            child: Text(
+              "${historyOrderDetailsListModel.price}",
+            ),
+          ),
+        ),
+        Expanded(
+          child: Center(
+            child: (historyOrderDetailsListModel.orderStatus)!?
+           const Icon(
+                    Icons.verified,
+                    color: Colors.green,
+                  ): const Text('-',),
+          ),
+        ),
+      ],
+    );
+
+Widget historyOrderDetailsBuilder({
+  required HistoryDataModel? historyOrderDetailsListModel,
+}) =>
+    SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) => historyOrderDetailsItem(
+          historyOrderDetailsListModel:
+              historyOrderDetailsListModel!.ordersList[index],
+        ),
+        separatorBuilder: (context, index) => myVDivider(),
+        itemCount: historyOrderDetailsListModel!.ordersList.length,
+      ),
+    );

@@ -55,76 +55,88 @@ class ProductDataModel {
     counter = json['counter'];
     quantity = json['quantity'];
   }
-}
-
-class FoodModel {
-  int? id;
-  String? name;
-  double? price;
-  String? image;
-  int? counter;
-  int? quantity;
-
-  FoodModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-    price = json['price'];
-    image = json['image'];
-    counter = json['counter'];
-    quantity = json['quantity'];
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'price': price,
+      'image': image,
+      'counter': counter,
+      'quantity': quantity,
+    };
   }
+
 }
 
-class BeveragesModel {
-  int? id;
-  String? name;
-  double? price;
-  String? image;
-  int? counter;
-  int? quantity;
-
-  BeveragesModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-    price = json['price'];
-    image = json['image'];
-    counter = json['counter'];
-    quantity = json['quantity'];
-  }
-}
-
-class DessertsModel {
-  int? id;
-  String? name;
-  double? price;
-  String? image;
-  int? counter;
-  int? quantity;
-
-  DessertsModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-    price = json['price'];
-    image = json['image'];
-    counter = json['counter'];
-    quantity = json['quantity'];
-  }
-}
-
-class SnacksModel {
-  int? id;
-  String? name;
-  double? price;
-  String? image;
-  int? counter;
-  int? quantity;
-
-  SnacksModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-    price = json['price'];
-    image = json['image'];
-    counter = json['counter'];
-    quantity = json['quantity'];
-  }
-}
+//
+// class FoodModel {
+//   int? id;
+//   String? name;
+//   double? price;
+//   String? image;
+//   int? counter;
+//   int? quantity;
+//
+//   FoodModel.fromJson(Map<String, dynamic> json) {
+//     id = json['id'];
+//     name = json['name'];
+//     price = json['price'];
+//     image = json['image'];
+//     counter = json['counter'];
+//     quantity = json['quantity'];
+//   }
+// }
+//
+// class BeveragesModel {
+//   int? id;
+//   String? name;
+//   double? price;
+//   String? image;
+//   int? counter;
+//   int? quantity;
+//
+//   BeveragesModel.fromJson(Map<String, dynamic> json) {
+//     id = json['id'];
+//     name = json['name'];
+//     price = json['price'];
+//     image = json['image'];
+//     counter = json['counter'];
+//     quantity = json['quantity'];
+//   }
+// }
+//
+// class DessertsModel {
+//   int? id;
+//   String? name;
+//   double? price;
+//   String? image;
+//   int? counter;
+//   int? quantity;
+//
+//   DessertsModel.fromJson(Map<String, dynamic> json) {
+//     id = json['id'];
+//     name = json['name'];
+//     price = json['price'];
+//     image = json['image'];
+//     counter = json['counter'];
+//     quantity = json['quantity'];
+//   }
+// }
+//
+// class SnacksModel {
+//   int? id;
+//   String? name;
+//   double? price;
+//   String? image;
+//   int? counter;
+//   int? quantity;
+//
+//   SnacksModel.fromJson(Map<String, dynamic> json) {
+//     id = json['id'];
+//     name = json['name'];
+//     price = json['price'];
+//     image = json['image'];
+//     counter = json['counter'];
+//     quantity = json['quantity'];
+//   }
+// }

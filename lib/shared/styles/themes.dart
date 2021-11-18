@@ -9,7 +9,7 @@ ThemeData darkTheme = ThemeData(
   primaryColor: Colors.black,
   brightness: Brightness.dark,
   backgroundColor: const Color(0xFF212121),
-  dividerColor: Colors.black12,
+  // dividerColor: Colors.black12,
   scaffoldBackgroundColor: HexColor('333739'),
   appBarTheme: AppBarTheme(
     titleSpacing: 20.0,
@@ -32,7 +32,7 @@ ThemeData darkTheme = ThemeData(
   bottomNavigationBarTheme: BottomNavigationBarThemeData(
     type: BottomNavigationBarType.fixed,
     selectedItemColor: defaultColor,
-    unselectedItemColor: Colors.grey,
+    unselectedItemColor: Colors.white,
     elevation: 20.0,
     backgroundColor: HexColor('333739'),
   ),
@@ -50,14 +50,27 @@ ThemeData darkTheme = ThemeData(
     ),
   ),
   fontFamily: 'jannah',
+  unselectedWidgetColor: Colors.white,
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: ButtonStyle(
+      side: MaterialStateProperty.all<BorderSide>(
+        const BorderSide(
+          color: defaultColor,
+          width: 0.6,
+        ),
+      ),
+    ),
+  ),
 );
 ThemeData lightTheme = ThemeData(
   primarySwatch: defaultColor,
   primaryColor: Colors.white,
   brightness: Brightness.light,
   backgroundColor: const Color(0xFFE5E5E5),
-  dividerColor: Colors.white54,
   scaffoldBackgroundColor: Colors.white,
+  iconTheme: const IconThemeData(
+    color: Colors.amber,
+  ),
   appBarTheme: AppBarTheme(
     titleSpacing: 20.0,
     systemOverlayStyle: SystemUiOverlayStyle(
@@ -65,21 +78,21 @@ ThemeData lightTheme = ThemeData(
       statusBarIconBrightness: Brightness.dark,
     ),
     backgroundColor: Colors.white,
-    titleTextStyle: const TextStyle(
+    titleTextStyle: TextStyle(
       fontFamily: 'jannah',
       fontSize: 20.0,
       fontWeight: FontWeight.bold,
-      color: Colors.black,
+      color: Colors.grey[600],
     ),
-    elevation: 0.0,
-    iconTheme: const IconThemeData(
-      color: Colors.black,
+    elevation: 0.5,
+    iconTheme: IconThemeData(
+      color: Colors.grey[600],
     ),
   ),
-  bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
     type: BottomNavigationBarType.fixed,
     selectedItemColor: defaultColor,
-    unselectedItemColor: Colors.grey,
+    unselectedItemColor: Colors.grey[600],
     elevation: 20.0,
     backgroundColor: Colors.white,
   ),
@@ -97,4 +110,21 @@ ThemeData lightTheme = ThemeData(
     ),
   ),
   fontFamily: 'jannah',
+  unselectedWidgetColor: Colors.grey[600],
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: ButtonStyle(
+      foregroundColor: MaterialStateProperty.all<Color>(
+        Colors.white,
+      ),
+      backgroundColor: MaterialStateProperty.all<Color>(
+        Colors.amber,
+      ),
+      side: MaterialStateProperty.all<BorderSide>(
+        const BorderSide(
+          color: defaultColor,
+          width: 0.6,
+        ),
+      ),
+    ),
+  ),
 );
