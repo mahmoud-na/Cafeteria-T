@@ -34,11 +34,12 @@ class CheckOutScreen extends StatelessWidget {
               child: Column(
                 children: [
                   myCartSummery(
-                    myCartTotalItem: cubit.myCart['totalItems'],
-                    myCartTotalPrice: cubit.myCart['totalPrice'],
+                    myCartTotalItem: cubit.myCartDataModel!.totalItems,
+                    myCartTotalPrice: cubit.myCartDataModel!.totalPrice,
+                    context: context,
                   ),
                   shopItemBuilder(
-                    menuModel: cubit.myCart["list"],
+                    menuModel: cubit.myCartDataModel!.products,
                     state: state,
                   ),
                   const SizedBox(
@@ -54,6 +55,7 @@ class CheckOutScreen extends StatelessWidget {
             ),
             child: SizedBox(
               width: double.infinity,
+              height: 50.0,
               child: FloatingActionButton(
                 elevation: 2.0,
                 shape: ContinuousRectangleBorder(
@@ -68,12 +70,10 @@ class CheckOutScreen extends StatelessWidget {
                     const SizedBox(
                       width: 50.0,
                     ),
-                    const Expanded(
+                     Expanded(
                       child: Text(
                         "إدفع",
-                        style: TextStyle(
-                          fontSize: 24.0,
-                        ),
+                        style: Theme.of(context).textTheme.headline6,
                       ),
                     ),
                     Icon(
@@ -97,65 +97,56 @@ class CheckOutScreen extends StatelessWidget {
   }
 
   Widget myCartSummery({
-    required int myCartTotalItem,
-    required double myCartTotalPrice,
-  }) =>
+    required int? myCartTotalItem,
+    required double? myCartTotalPrice,
+    required BuildContext context,
+   }) =>
       Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         children: [
-          const Text(
+           Text(
             "ملخص الطلب",
-            style: TextStyle(
-              fontSize: 20.0,
-            ),
-          ),
-          myDivider(),
+            style: Theme.of(context).textTheme.headline6,
+           ),
+          myVDivider(),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               const SizedBox(
                 width: 30.0,
               ),
-              const Expanded(
+               Expanded(
                 child: Text(
                   "عدد الطلبات",
-                  style: TextStyle(
-                    fontSize: 20.0,
-                  ),
+                  style: Theme.of(context).textTheme.headline6,
                 ),
               ),
               Text(
                 "$myCartTotalItem",
-                style: const TextStyle(
-                  fontSize: 20.0,
-                ),
+                style: Theme.of(context).textTheme.headline6,
               ),
               const SizedBox(
                 width: 30.0,
               ),
             ],
           ),
-          myDivider(),
+          myVDivider(),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               const SizedBox(
                 width: 30.0,
               ),
-              const Expanded(
+               Expanded(
                 child: Text(
                   "المبلغ الإجمالي",
-                  style: TextStyle(
-                    fontSize: 20.0,
-                  ),
+                  style: Theme.of(context).textTheme.headline6,
                 ),
               ),
               Text(
                 "$myCartTotalPrice",
-                style: const TextStyle(
-                  fontSize: 20.0,
-                ),
+                style: Theme.of(context).textTheme.headline6,
               ),
               const SizedBox(
                 width: 30.0,

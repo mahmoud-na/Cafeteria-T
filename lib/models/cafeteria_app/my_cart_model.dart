@@ -1,12 +1,35 @@
 import 'package:cafeteriat/models/cafeteria_app/product_model.dart';
 
 class MyCartModel{
-  double? totalPrice ;
-  int? totalItems ;
+  double totalPrice =0.0;
+  int totalItems =0;
   List<ProductDataModel> products = [];
-  MyCartModel({this.totalItems, this.totalPrice,});
-}
 
+
+  MyCartModel.fromJson(Map<String, dynamic> json) {
+    totalPrice = json['totalPrice'];
+    totalItems = json['totalItems'];
+    if (json['list'] != null) {
+      json['list'].forEach((element) {
+        products.add(ProductDataModel.fromJson(element));
+      });
+    }
+  }
+   toMap() {
+    Map saveMyCart = {
+      'totalPrice' : totalPrice,
+      'totalItems' : totalItems,
+      'list' : [],
+    };
+
+    products.forEach((element) {
+      saveMyCart['list'].add(element.toMap());
+    });
+    return saveMyCart;
+  }
+
+}
+//
 // class MyCartDataModel {
 //   int? id;
 //   String? name;
@@ -23,4 +46,6 @@ class MyCartModel{
 //     counter = json['counter'];
 //     quantity = json['quantity'];
 //   }
+//
+//
 // }

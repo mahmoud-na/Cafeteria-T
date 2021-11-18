@@ -16,6 +16,7 @@ Future<void> main() async {
   await Firebase.initializeApp();
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
+
   bool? isDark = CacheHelper.getData(key: "isDark");
   late Widget appStartingScreen;
   appStartingScreen = Container();
@@ -49,19 +50,6 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => CafeteriaCubit()..getData(),
-            // ..getMenuData().then
-            //   (value) => CafeteriaCubit().getUserData(activationCode: 'jm').then(
-            //     (value) {
-            //       CafeteriaCubit().getCurrentHistoryData().then(
-            //         (value) {
-            //           CafeteriaCubit().getPreviousHistoryData().then(
-            //                 (value) => CafeteriaCubit().getMyOrderData(),
-            //               );
-            //         },
-            //       );
-            //     },
-            //   ),
-            // ),
         ),
       ],
       child: BlocConsumer<AppCubit, AppStates>(

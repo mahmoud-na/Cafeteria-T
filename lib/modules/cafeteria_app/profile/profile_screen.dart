@@ -19,7 +19,6 @@ class profileScreen extends StatelessWidget {
         var cubit = CafeteriaCubit.get(context);
         return Scaffold(
           appBar: AppBar(
-            elevation: 0.5,
             title: const Text("بياناتي"),
             titleSpacing: 5.0,
             leading: IconButton(
@@ -55,7 +54,7 @@ class profileScreen extends StatelessWidget {
                           child: SizedBox(
                             height: 160.0,
                             child: CachedNetworkImage(
-                              imageUrl: cubit.userModel!.data!.coverImage,
+                              imageUrl:cubit.userModel!=null? cubit.userModel!.data!.coverImage:'',
                               imageBuilder: (context, imageProvider) =>
                                   Container(
                                 decoration: BoxDecoration(
@@ -119,7 +118,7 @@ class profileScreen extends StatelessWidget {
                             );
                           },
                           child: CachedNetworkImage(
-                            imageUrl: cubit.userModel!.data!.profileImage,
+                            imageUrl: cubit.userModel?.data?.profileImage??"",
                             imageBuilder: (context, imageProvider) => Container(
                               height: 128.0,
                               width: 128.0,
@@ -182,8 +181,8 @@ class profileScreen extends StatelessWidget {
                   ),
                   child: QrImage(
                     data: cubit.getQrCodeDataReady(
-                      name: cubit.userModel!.data!.name!,
-                      userId: cubit.userModel!.data!.userId!,
+                      name: cubit.userModel?.data?.name??"",
+                      userId: cubit.userModel?.data?.userId??"",
                     ),
                     errorCorrectionLevel: 3,
                     version: QrVersions.auto,

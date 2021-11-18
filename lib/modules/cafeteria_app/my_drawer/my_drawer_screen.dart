@@ -3,9 +3,12 @@ import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/states.dart';
 import 'package:cafeteriat/modules/cafeteria_app/about/about_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/current_history/current_history_screen.dart';
+import 'package:cafeteriat/modules/cafeteria_app/login/login_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/previous_history/previous_history_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/profile/profile_screen.dart';
 import 'package:cafeteriat/shared/components/components.dart';
+import 'package:cafeteriat/shared/cubit/cubit.dart';
+import 'package:cafeteriat/shared/network/local/cache_helper.dart';
 import 'package:cafeteriat/shared/styles/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,20 +25,20 @@ class MyDrawer extends StatelessWidget {
         return Drawer(
           child: ListView(
             children: [
-              myDrawerHeaderBuilder(context,cubit),
+              myDrawerHeaderBuilder(context, cubit),
               const SizedBox(
                 height: 7.0,
               ),
               Center(
-                child: Text("${cubit.userModel?.data?.name}"
-                ,
+                child: Text(
+                  "${cubit.userModel?.data?.name}",
                   style: Theme.of(context).textTheme.bodyText1,
                 ),
               ),
               const SizedBox(
                 height: 5.0,
               ),
-              myDivider(),
+              myVDivider(),
               defaultListTile(
                 title: 'بياناتي',
                 icon: const Icon(Icons.person),
@@ -43,7 +46,7 @@ class MyDrawer extends StatelessWidget {
                   navigateTo(context, profileScreen());
                 },
               ),
-              myDivider(),
+              myVDivider(),
               Theme(
                 data: Theme.of(context).copyWith(
                   dividerColor: Colors.transparent,
@@ -71,7 +74,7 @@ class MyDrawer extends StatelessWidget {
                   ],
                 ),
               ),
-              myDivider(),
+              myVDivider(),
               defaultListTile(
                 title: 'حول التطبيق',
                 icon: const Icon(Icons.info),
@@ -82,20 +85,14 @@ class MyDrawer extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 90.0,
+                  vertical: 60.0,
                 ),
                 child: OutlinedButton(
-                  style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.all<Color>(
-                      Colors.grey,
-                    ),
-                    side: MaterialStateProperty.all<BorderSide>(
-                      const BorderSide(
-                        color: defaultColor,
-                        width: 0.6,
-                      ),
-                    ),
-                  ),
-                  onPressed: () {},
+                  onPressed: () {
+                    CacheHelper.removeAllData().then((value) {
+                      navigateAndReplace(context, const LoginScreen());
+                    });
+                  },
                   child: const Text(
                     "تسجيل الخروخ",
                   ),
@@ -108,7 +105,7 @@ class MyDrawer extends StatelessWidget {
     );
   }
 
-  Widget myDrawerHeaderBuilder(context,var cubit) => SizedBox(
+  Widget myDrawerHeaderBuilder(context, var cubit) => SizedBox(
         width: double.infinity,
         height: 220.0,
         child: Stack(
@@ -116,118 +113,106 @@ class MyDrawer extends StatelessWidget {
           children: [
             Align(
               alignment: AlignmentDirectional.topCenter,
-                child: SizedBox(
-                  height: 160.0,
-                  child: CachedNetworkImage(
-                    imageUrl: cubit.userModel!.data!.coverImage,
-                    imageBuilder: (context, imageProvider) =>
-                        Container(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: imageProvider,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                    placeholder: (context, url) => Container(
-                      height: 131.0,
-                      width: 131.0,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 4,
-                      ),
-                      decoration: const BoxDecoration(
-                        color: Colors.black12,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(
-                            10.0,
-                          ),
-                          topRight: Radius.circular(
-                            10.0,
-                          ),
-                        ),
-                        image: DecorationImage(
-                          fit: BoxFit.cover,
-                          image: AssetImage(
-                              'assets/images/DrawerBackground.jpg'),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-            ),
-            CircleAvatar(
-              radius: 54.0,
-              backgroundColor:
-              Theme.of(context).scaffoldBackgroundColor,
+              child: SizedBox(
+                height: 160.0,
                 child: CachedNetworkImage(
-                  imageUrl: cubit.userModel!.data!.profileImage,
+                  imageUrl: cubit.userModel?.data?.coverImage ?? '',
                   imageBuilder: (context, imageProvider) => Container(
-                    height: 100.0,
-                    width: 100.0,
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
                       image: DecorationImage(
                         image: imageProvider,
                         fit: BoxFit.cover,
                       ),
                     ),
                   ),
-                  placeholder: (context, url) => Container(
-                    height: 104.0,
-                    width: 104.0,
-                    child: const CircularProgressIndicator(
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(
                       strokeWidth: 4,
-                    ),
-                    decoration: const BoxDecoration(
-                      color: Colors.black12,
-                      shape: BoxShape.circle,
                     ),
                   ),
                   errorWidget: (context, url, error) => Container(
-                    width: 100.0,
-                    height: 100.0,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Image(
-                      image: AssetImage('assets/images/person.png'),
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(
+                          10.0,
+                        ),
+                        topRight: Radius.circular(
+                          10.0,
+                        ),
+                      ),
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: AssetImage('assets/images/DrawerBackground.jpg'),
+                      ),
                     ),
                   ),
                 ),
+              ),
             ),
+            CircleAvatar(
+              radius: 54.0,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              child: CachedNetworkImage(
+                imageUrl: cubit.userModel?.data?.profileImage ?? '',
+                imageBuilder: (context, imageProvider) => Container(
+                  height: 100.0,
+                  width: 100.0,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: imageProvider,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                placeholder: (context, url) => Container(
+                  height: 104.0,
+                  width: 104.0,
+                  child: const CircularProgressIndicator(
+                    strokeWidth: 4,
+                  ),
+                  decoration: const BoxDecoration(
+                    color: Colors.black12,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  width: 100.0,
+                  height: 100.0,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Image(
+                    image: AssetImage('assets/images/person.png'),
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  AppCubit.get(context).isDarkMode
+                      ? const Icon(
+                          Icons.dark_mode,
+                        )
+                      : const Icon(
+                          Icons.light_mode,
+                          color: Colors.amber,
+                        ),
+                  Switch(
+                    value: !(AppCubit.get(context).isDarkMode),
+                    onChanged: (value) {
+                      AppCubit.get(context).changeAppThemeMode();
+                    },
+                    activeColor: Colors.amber,
+                  ),
+                ],
+              ),
+            )
           ],
         ),
-        // Stack(
-        //   alignment: AlignmentDirectional.bottomCenter,
-        //   children: [
-        //     Align(
-        //       alignment: AlignmentDirectional.topCenter,
-        //       child: Container(
-        //         height: 160.0,
-        //         decoration: const BoxDecoration(
-        //           image: DecorationImage(
-        //             fit: BoxFit.cover,
-        //             image: AssetImage('assets/images/DrawerBackground.jpg'),
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        //     CircleAvatar(
-        //       radius: 54.0,
-        //       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        //       child: const CircleAvatar(
-        //         radius: 50.0,
-        //         backgroundImage: AssetImage('assets/images/person.png'),
-        //       ),
-        //     ),
-        //   ],
-        // ),
       );
 }

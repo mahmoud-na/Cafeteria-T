@@ -8,7 +8,7 @@ class AppCubit extends Cubit<AppStates> {
   AppCubit() : super(AppInitialState());
 
   static AppCubit get(context) => BlocProvider.of(context);
-  bool isDarkMode = false;
+  bool isDarkMode = true;
 
 
   void changeAppThemeMode({dynamic fromShared}) {
