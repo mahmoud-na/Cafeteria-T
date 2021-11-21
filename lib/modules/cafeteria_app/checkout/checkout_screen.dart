@@ -40,7 +40,6 @@ class CheckOutScreen extends StatelessWidget {
                   ),
                   shopItemBuilder(
                     menuModel: cubit.myCartDataModel!.products,
-                    state: state,
                   ),
                   const SizedBox(
                     height: 60.0,

@@ -33,10 +33,9 @@ class Sockets {
           seconds: delayTime,
         ),
       );
-      print("-------------------------------------------\n");
+      print("-------------------------------------------------------------- Start Connection --------------------------------------------------------------------\n");
       print(
           'Connected to: ${socket.remoteAddress.address}:${socket.remotePort}');
-      print("-------------------------------------------\n");
       await sendMessage(socket, query);
       subscription = socket.listen((Uint8List data) {
         toBeDecoded += data;
@@ -48,15 +47,12 @@ class Sockets {
               seconds: delayTime,
             ),
           );
+      final decodedData = jsonDecode(utf8.decode(toBeDecoded));
+      print('Server: $decodedData');
       print("-------------------------------------------\n");
       print('Server left.');
-      print("-------------------------------------------\n");
+      print("-------------------------------------------------------------- end Connection ----------------------------------------------------------------------\n");
       socket.destroy();
-      final decodedData = jsonDecode(utf8.decode(toBeDecoded));
-      print("-------------------------------------------\n");
-      print('Server: $decodedData');
-      // printFullText(decodedData);
-      print("-------------------------------------------\n");
       return decodedData;
     } on SocketException {
       print(
