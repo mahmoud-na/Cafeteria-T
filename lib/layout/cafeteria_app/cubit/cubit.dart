@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/states.dart';
+import 'package:cafeteriat/models/cafeteria_app/edit_order_response_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/history_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/my_cart_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/my_order_model.dart';
@@ -17,11 +18,13 @@ import 'package:cafeteriat/shared/components/constants.dart';
 import 'package:cafeteriat/shared/network/local/cache_helper.dart';
 import 'package:cafeteriat/shared/network/remote/socket_helper.dart';
 import 'package:cafeteriat/shared/styles/colors.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
+import 'package:intl/intl.dart';
+import 'package:ntp/ntp.dart';
 import '../cafeteria_app_layout.dart';
 
 class CafeteriaCubit extends Cubit<CafeteriaStates> {
@@ -30,7 +33,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   static CafeteriaCubit get(context) => BlocProvider.of(context);
   bool isMyOrder = true;
   int navBarCurrentIndex = 0;
-
+  int timeNow = 0;
   var platFormType = Platform.operatingSystem;
 
   List<Widget> screens = [
@@ -58,6 +61,10 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       }
     }
   }
+
+  Future<int> timeNowInHours() async => await NTP.now().then(
+        (value) => value.hour,
+      );
 
   ProductModel? menuModel;
 
@@ -191,13 +198,26 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   //   });
   // }
   MyOrderModel? myOrderModel;
+  MyOrderModel? myEditedOrderModel;
 
   Future<void> getMyOrderData() async {
     emit(CafeteriaMyOrderLoadingState());
-    await SocketHelper.getData(
+    await SocketHelper.postData(
       query: "EID:$uId,RequestUpdateOrder<EOF>",
     ).then((value) {
       myOrderModel = MyOrderModel.fromJson(value);
+      print("ccccccccccccccc");
+      print(
+          "sssssssssssssssssssssssssssssssssssssssssssssssssssssss ${myOrderModel!.data!.totalPrice}");
+      myEditedOrderModel = MyOrderModel(data: myOrderModel!.data);
+      // myEditedOrderModel!.data = MyOrderDataModel(
+      //   dateTime: myOrderModel!.data!.dateTime,
+      //   orderList: myOrderModel!.data!.orderList,
+      //   orderNumber: myOrderModel!.data!.orderNumber,
+      //   timeAuthorization: myOrderModel!.data!.timeAuthorization,
+      //   totalPrice: myOrderModel!.data!.totalPrice,
+      // );
+
       emit(CafeteriaMyOrderSuccessState());
     }).catchError((error) {
       print(error.toString());
@@ -207,7 +227,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
 
   SubmitOrderResponseModel? submitOrderResponseModel;
 
-  String sendOrder({required List<ProductDataModel> myCartList}) {
+  String sendOrder({required List myCartList}) {
     String order = '';
     for (int index = 0; index < myCartList.length; index++) {
       if (myCartList[index].id! >= 2000 && myCartList[index].id! < 3000) {
@@ -252,34 +272,65 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       )},EName:${userModel!.data!.name},TCost:${myCartDataModel!.totalPrice}<EOF>",
     ).then((value) {
       submitOrderResponseModel = SubmitOrderResponseModel.fromJson(value);
-      print(submitOrderResponseModel!.data!.orderNumber);
-      print(submitOrderResponseModel!.data!.errMsg);
-      print(submitOrderResponseModel!.data!.orderValid);
-
       if (submitOrderResponseModel!.data!.orderValid == 'true') {
         CacheHelper.removeData(key: 'savedMyCartString').then((value) async {
-          await getMenuData().then(
-            (value) => emit(CafeteriaPostMyOrderSuccessState()),
-          );
+          await getMenuData().then((value) {
+            getMyOrderData();
+            emit(CafeteriaPostMyOrderSuccessState());
+          });
         });
         clearMyCart();
         Navigator.pop(context);
+      } else {
+        emit(CafeteriaPostMyOrderErrorState(
+            submitOrderResponseModel!.data!.errMsg!));
       }
-      emit(CafeteriaPostMyOrderSuccessState());
     }).catchError((error) {
       print(error.toString());
       emit(CafeteriaPostMyOrderErrorState(error.toString()));
     });
   }
 
-  Widget shopItemRemoveIcon(var menuModel, context) {
-    if (menuModel.counter > 0) {
+  EditOrderResponseModel? editOrderResponseModel;
+
+  void editMyOrderData() {
+    emit(CafeteriaEditMyOrderLoadingState());
+    SocketHelper.postData(
+      query: "EID:$uId,UpdateOrder,${sendOrder(
+        myCartList: myEditedOrderModel!.data!.orderList,
+      )},EName:${userModel!.data!.name},TCost:${myEditedOrderModel!.data!.totalPrice}<EOF>",
+    ).then((value) async {
+      print("nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
+      editOrderResponseModel = EditOrderResponseModel.fromJson(value);
+      print("qqqqqqqqqqqqqqqqqqqq");
+
+      if (editOrderResponseModel!.data!.updateValid == 'true') {
+print("ssssssssssssssssssssssss");
+        await getMyOrderData();
+print("rrrrrrrrrrrrrrrrrrrrrrr");
+
+emit(CafeteriaEditMyOrderSuccessState());
+      } else {
+        emit(CafeteriaEditMyOrderErrorState(
+            editOrderResponseModel!.data!.errorMessage!));
+      }
+    }).catchError((error) {
+      print(error.toString());
+      emit(CafeteriaEditMyOrderErrorState(error.toString()));
+    });
+  }
+
+  Widget shopItemRemoveIcon(var model, context) {
+    if (model.counter > 0 && timeNow < timeLimitAllowed) {
       return IconButton(
         onPressed: () {
-          decrementMenuItemCounter(menuModel, context);
+          decrementMenuItemCounter(model, context);
         },
-        icon: const Icon(Icons.remove_circle_outline,
-            size: 40.0, color: Colors.redAccent),
+        icon: const Icon(
+          Icons.remove_circle_outline,
+          size: 40.0,
+          color: Colors.redAccent,
+        ),
       );
     } else {
       return const IconButton(
@@ -292,11 +343,11 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     }
   }
 
-  Widget shopItemAddIcon(var menuModel) {
-    if (menuModel.counter < 1000) {
+  Widget shopItemAddIcon(var model) {
+    if (model.counter < 1000 && timeNow < timeLimitAllowed) {
       return IconButton(
         onPressed: () {
-          incrementMenuItemCounter(menuModel);
+          incrementMenuItemCounter(model);
         },
         icon: const Icon(
           Icons.add_circle_outline,
@@ -321,17 +372,30 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     emit(CafeteriaChangeNavBarState());
   }
 
-  void incrementMenuItemCounter(ProductDataModel menuModel) {
-    menuModel.counter = menuModel.counter + 1;
+  void incrementMenuItemCounter(var model) {
+    model.counter = model.counter + 1;
 
-    addToCart(menuModel);
+    if (model.runtimeType == MyOrderListModel) {
+      myEditedOrderModel!.data!.totalPrice =
+          myEditedOrderModel!.data!.totalPrice! + model.price;
+      print("myEditedOrderModel  ${myEditedOrderModel!.data!.totalPrice}");
+      print("myOrderModel  ${myOrderModel!.data!.totalPrice}");
+    } else {
+      print(model.runtimeType);
+      addToCart(model);
+    }
 
     emit(CafeteriaChangeIncrementCounterSuccessState());
   }
 
-  void decrementMenuItemCounter(ProductDataModel menuModel, context) {
-    menuModel.counter = menuModel.counter - 1;
-    removeFromCart(menuModel, context);
+  void decrementMenuItemCounter(var model, context) {
+    model.counter = model.counter - 1;
+    if (model.runtimeType == MyOrderListModel) {
+      myEditedOrderModel!.data!.totalPrice =
+          myEditedOrderModel!.data!.totalPrice! - model.price;
+    } else {
+      removeFromCart(model, context);
+    }
     emit(CafeteriaChangeDecrementCounterSuccessState());
   }
 
@@ -387,7 +451,8 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   }
 
   void getAppData() async {
-    await getUserData(activationCode: "jm");
+    await getUserData(activationCode: "ih");
+    await getMyOrderData();
     await getMyCartData();
     await getMenuData();
     await getPreviousHistoryData();
@@ -523,5 +588,27 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
         emit(CafeteriaUploadCoverImageToFirebaseErrorState(error.toString()));
       });
     }
+  }
+
+
+
+  void reloadMyOrderData() {
+    List<MyOrderListModel> originalOrderList = [];
+    myOrderModel!.data!.orderList.forEach((element) {
+      originalOrderList.add(MyOrderListModel(
+        image: element.image,
+        name: element.name,
+        counter: element.counter,
+        id: element.id,
+        price: element.price,
+      ));
+    });
+    myEditedOrderModel!.data = MyOrderDataModel(
+      dateTime: myOrderModel!.data!.dateTime,
+      orderList: originalOrderList,
+      orderNumber: myOrderModel!.data!.orderNumber,
+      timeAuthorization: myOrderModel!.data!.timeAuthorization,
+      totalPrice: myOrderModel!.data!.totalPrice,
+    );
   }
 }

@@ -270,7 +270,7 @@ Widget shopItem({
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Expanded(
-                                child: cubit.shopItemAddIcon(menuModel),
+                                child:  cubit.shopItemAddIcon(menuModel),
                               ),
                               Container(
                                 alignment: Alignment.center,
@@ -302,7 +302,6 @@ Widget shopItem({
 
 Widget shopItemBuilder({
   required var menuModel,
-  required var state,
 }) {
   return ConditionalBuilder(
       condition: menuModel != null,

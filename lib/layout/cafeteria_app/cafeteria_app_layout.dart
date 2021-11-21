@@ -20,6 +20,7 @@ class CafeteriaHomeScreen extends StatelessWidget {
       listener: (context, state) {},
       builder: (context, state) {
         var cubit = CafeteriaCubit.get(context);
+        cubit.timeNowInHours().then((value) => cubit.timeNow = value);
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
@@ -29,9 +30,11 @@ class CafeteriaHomeScreen extends StatelessWidget {
                 cubit.appBarTitles[cubit.navBarCurrentIndex],
               ),
               actions: [
-                if (cubit.isMyOrder)
+                if (cubit.myOrderModel != null)
                   IconButton(
                     onPressed: () {
+                      cubit.reloadMyOrderData();
+
                       navigateTo(
                         context,
                         const MyOrderScreen(),
@@ -64,7 +67,7 @@ class CafeteriaHomeScreen extends StatelessWidget {
               child: BottomNavigationBar(
                 elevation: 0,
                 backgroundColor: Colors.transparent,
-                items:  const [
+                items: const [
                   BottomNavigationBarItem(
                     icon: Icon(
                       Icons.fastfood,
@@ -100,13 +103,14 @@ class CafeteriaHomeScreen extends StatelessWidget {
                 currentIndex: cubit.navBarCurrentIndex,
               ),
             ),
-            floatingActionButton: ( cubit.myCartDataModel !=null && cubit.myCartDataModel!.totalItems != 0)
+            floatingActionButton: (cubit.myCartDataModel != null &&
+                    cubit.myCartDataModel!.totalItems != 0)
                 ? SizedBox(
                     height: 60.0,
                     width: 60.0,
                     child: FloatingActionButton(
                       backgroundColor: defaultColor,
-                      child:  Icon(
+                      child: Icon(
                         Icons.shopping_cart,
                         size: 35,
                         color: Colors.grey[100],

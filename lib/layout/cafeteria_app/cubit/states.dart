@@ -67,6 +67,19 @@ class CafeteriaPostMyOrderErrorState extends CafeteriaStates {
   CafeteriaPostMyOrderErrorState(this.error);
 }
 
+
+
+class CafeteriaEditMyOrderLoadingState extends CafeteriaStates {}
+
+class CafeteriaEditMyOrderSuccessState extends CafeteriaStates {}
+
+class CafeteriaEditMyOrderErrorState extends CafeteriaStates {
+  final String error;
+  CafeteriaEditMyOrderErrorState(this.error);
+}
+
+
+
 class CafeteriaUserDataLoadingState extends CafeteriaStates {}
 
 class CafeteriaUserDataSuccessState extends CafeteriaStates {}

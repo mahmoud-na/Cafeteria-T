@@ -1,4 +1,5 @@
 String? uId;
+int timeLimitAllowed = 16;
 void printFullText(String text) {
   final pattern = RegExp('.{1,800}');
 
