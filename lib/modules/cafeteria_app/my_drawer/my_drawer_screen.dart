@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MyDrawer extends StatelessWidget {
-  const MyDrawer({Key? key}) : super(key: key);
+  MyDrawer({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +90,28 @@ class MyDrawer extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: () {
                     CacheHelper.removeAllData().then((value) {
-                      navigateAndReplace(context, const LoginScreen());
+                      defaultShowDialog(
+                        context: context,
+                        title: "تسجيل خروج",
+                        content: "هل انت متأكد من تسجيلك للخروج",
+                        icon: const Icon(
+                          Icons.error,
+                          color: Colors.red,
+                          size: 40,
+                        ),
+                        actions: [
+                          defaultAlertActionButtons(
+                            context: context,
+                            onPressed: () {
+                              navigateAndReplace(
+                                context,
+                                const LoginScreen(),
+                              );
+                            },
+                          ),
+                        ],
+                      );
+
                     });
                   },
                   child: const Text(
@@ -211,7 +232,18 @@ class MyDrawer extends StatelessWidget {
                   ),
                 ],
               ),
-            )
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  right: 25.0,
+                ),
+                child: defaultQrIconButton(
+                  context: context,
+                ),
+              ),
+            ),
           ],
         ),
       );

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/states.dart';
 import 'package:cafeteriat/shared/components/components.dart';
+import 'package:cafeteriat/shared/components/constants.dart';
 import 'package:cafeteriat/shared/styles/icon_broken.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -179,20 +180,7 @@ class profileScreen extends StatelessWidget {
                     ),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: QrImage(
-                    data: cubit.getQrCodeDataReady(
-                      name: cubit.userModel?.data?.name??"",
-                      userId: cubit.userModel?.data?.userId??"",
-                    ),
-                    errorCorrectionLevel: 3,
-                    version: QrVersions.auto,
-                    size: 360,
-                    embeddedImage:
-                        const AssetImage('assets/images/Aio_Logo_original.png'),
-                    embeddedImageStyle: QrEmbeddedImageStyle(
-                      size: const Size(80, 80),
-                    ),
-                  ),
+                  child: qrImage,
                 ),
                 Text(
                   'قم بمسح هذا الكود للإستلام.',

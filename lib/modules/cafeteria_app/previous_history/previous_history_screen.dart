@@ -26,11 +26,11 @@ class PreviousHistoryScreen extends StatelessWidget {
               ),
             ),
           ),
-          body:historyItemBuilder(state: state,historyModel: CafeteriaCubit.get(context).previousHistoryModel?.data,),
-
-          // historyItem(
-          //   historyModel: CafeteriaCubit.get(context).currentHistoryModel,
-          // ),
+          body: historyItemBuilder(
+            state: state,
+            historyModel:
+                CafeteriaCubit.get(context).previousHistoryModel?.data,
+          ),
         );
       },
     );

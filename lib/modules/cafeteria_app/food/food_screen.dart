@@ -17,8 +17,11 @@ class FoodScreen extends StatelessWidget {
       listener: (context, state) {},
       builder: (context, state) {
         var cubit = CafeteriaCubit.get(context);
-        return shopItemBuilder(
-          menuModel: cubit.menuModel?.data?.food,
+        return RefreshIndicator(
+          child: shopItemBuilder(
+            menuModel: cubit.menuModel?.data?.food,
+          ),
+          onRefresh: () => cubit.getMenuData(),
         );
       },
     );

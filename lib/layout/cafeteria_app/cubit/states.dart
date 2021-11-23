@@ -2,7 +2,12 @@ abstract class CafeteriaStates {}
 
 class CafeteriaInitialState extends CafeteriaStates {}
 
+
+
 class CafeteriaChangeNavBarState extends CafeteriaStates {}
+class AppChangeBottomSheetState extends CafeteriaStates {}
+
+class ClearMyCartSuccessState extends CafeteriaStates {}
 
 class CafeteriaProfilePictureLoadingState extends CafeteriaStates {}
 

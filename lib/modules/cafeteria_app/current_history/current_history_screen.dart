@@ -13,6 +13,7 @@ class CurrentHistoryScreen extends StatelessWidget {
     return BlocConsumer<CafeteriaCubit, CafeteriaStates>(
       listener: (context, state) {},
       builder: (context, state) {
+
         return Scaffold(
           appBar: AppBar(
             title: const Text("طلبات الشهر الحالي"),
@@ -26,7 +27,14 @@ class CurrentHistoryScreen extends StatelessWidget {
               ),
             ),
           ),
-          body:historyItemBuilder(state: state,historyModel: CafeteriaCubit.get(context).currentHistoryModel?.data,),
+          body: RefreshIndicator(
+            child: historyItemBuilder(
+              state: state,
+              historyModel: CafeteriaCubit.get(context).currentHistoryModel?.data,
+              // onRefresh: () => CafeteriaCubit.get(context).getCurrentHistoryData() ,
+            ),
+            onRefresh: () => CafeteriaCubit.get(context).getCurrentHistoryData(),
+          ),
 
           // historyItem(
           //   historyModel: CafeteriaCubit.get(context).currentHistoryModel,
