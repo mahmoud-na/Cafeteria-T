@@ -4,9 +4,11 @@ import 'package:cafeteriat/layout/cafeteria_app/cubit/states.dart';
 import 'package:cafeteriat/models/cafeteria_app/history_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/product_model.dart';
 import 'package:cafeteriat/modules/cafeteria_app/current_history_order_details/current_history_order_details_screen.dart';
+import 'package:cafeteriat/shared/components/constants.dart';
 import 'package:cafeteriat/shared/styles/colors.dart';
 import 'package:cafeteriat/shared/styles/icon_broken.dart';
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -270,7 +272,7 @@ Widget shopItem({
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Expanded(
-                                child:  cubit.shopItemAddIcon(menuModel),
+                                child: cubit.shopItemAddIcon(menuModel),
                               ),
                               Container(
                                 alignment: Alignment.center,
@@ -304,23 +306,20 @@ Widget shopItemBuilder({
   required var menuModel,
 }) {
   return ConditionalBuilder(
-      condition: menuModel != null,
-      builder: (context) => SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: ListView.separated(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemBuilder: (context, index) => shopItem(
-            menuModel: menuModel[index],
-          ),
-          separatorBuilder: (context, index) => myVDivider(),
-          itemCount: menuModel.length,
-        ),
+    condition: menuModel != null,
+    builder: (context) => ListView.separated(
+      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+      // shrinkWrap: true,
+      itemBuilder: (context, index) => shopItem(
+        menuModel: menuModel[index],
       ),
-      fallback: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
+      separatorBuilder: (context, index) => myVDivider(),
+      itemCount: menuModel.length,
+    ),
+    fallback: (context) => const Center(
+      child: CircularProgressIndicator(),
+    ),
+  );
 }
 
 String dateFormatting(HistoryDataModel historyModel) {
@@ -479,11 +478,14 @@ Widget historyOrderDetailsItem(
         ),
         Expanded(
           child: Center(
-            child: (historyOrderDetailsListModel.orderStatus)!?
-           const Icon(
+            child: (historyOrderDetailsListModel.orderStatus)!
+                ? const Icon(
                     Icons.verified,
                     color: Colors.green,
-                  ): const Text('-',),
+                  )
+                : const Text(
+                    '-',
+                  ),
           ),
         ),
       ],
@@ -504,4 +506,169 @@ Widget historyOrderDetailsBuilder({
         separatorBuilder: (context, index) => myVDivider(),
         itemCount: historyOrderDetailsListModel!.ordersList.length,
       ),
+    );
+
+Widget defaultQrIconButton({
+  required BuildContext context,
+}) =>
+    IconButton(
+      onPressed: () => WidgetsBinding.instance!.addPostFrameCallback(
+        (_) => showQrFunction(
+          context: context,
+        ),
+      ),
+      icon: const Icon(
+        Icons.qr_code_outlined,
+        size: 30.0,
+      ),
+    );
+
+Future showQrFunction({required BuildContext context, req}) => showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.all(12.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.black,
+              width: 10.0,
+            ),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: qrImage,
+        ),
+      ),
+    );
+
+Future<void> defaultShowDialog({
+  required BuildContext context,
+  required String title,
+  required String content,
+   VoidCallback? toDoAfterClosing ,
+  bool closeable = true,
+  Widget? icon,
+  List<Widget>? actions,
+  Widget? defaultTextButton,
+}) async =>
+    WidgetsBinding.instance!.addPostFrameCallback(
+      (_) => showDialog(
+        context: context,
+        builder: (context) => WillPopScope(
+          onWillPop: () async => closeable,
+          child: AlertDialog(
+            contentPadding: const EdgeInsets.all(
+              15.0,
+            ),
+            titlePadding: const EdgeInsets.only(
+              top: 15.0,
+            ),
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                defaultTextButton ?? const SizedBox(),
+                Flexible(
+                  fit: FlexFit.loose,
+                  flex: 2,
+                  child: Text(
+                    content,
+                    textDirection: TextDirection.rtl,
+                    softWrap: true,
+                    textAlign: TextAlign.justify,
+                  ),
+                ),
+              ],
+            ),
+            title: Column(
+              children: [
+                icon ?? const SizedBox(),
+                Text(
+                  title,
+                ),
+                const Divider(
+                  color: Colors.grey,
+                  indent: 30,
+                  endIndent: 30,
+                ),
+              ],
+            ),
+            buttonPadding: EdgeInsets.zero,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(20.0),
+              ),
+            ),
+            actions: actions,
+          ),
+        ),
+      ).then(
+        (value) {
+          if(toDoAfterClosing!=null){
+            toDoAfterClosing();
+          }
+        },
+      ),
+    );
+
+Widget defaultAlertActionButtons({
+  required BuildContext context,
+  required VoidCallback onPressed,
+}) =>
+    Row(
+      children: <Widget>[
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  width: 1.5,
+                  color: Colors.grey.shade200,
+                ),
+                right: BorderSide(
+                  width: 1.5,
+                  color: Colors.grey.shade200,
+                ),
+              ),
+            ),
+            child: TextButton(
+              child: const Text(
+                'إلغاء',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 18.0,
+                ),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        ),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  width: 1.5,
+                  color: Colors.grey.shade200,
+                ),
+              ),
+            ),
+            child: TextButton(
+              child: const Text(
+                'تأكيد',
+                textDirection: TextDirection.rtl,
+                style: TextStyle(
+                  fontSize: 18.0,
+                ),
+              ),
+              onPressed: onPressed,
+            ),
+          ),
+        ),
+      ],
     );

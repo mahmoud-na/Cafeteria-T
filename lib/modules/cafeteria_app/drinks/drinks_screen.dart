@@ -14,8 +14,11 @@ class DrinksScreen extends StatelessWidget {
       listener: (context, state) {},
       builder: (context, state) {
         var cubit = CafeteriaCubit.get(context);
-        return shopItemBuilder(
-          menuModel: cubit.menuModel?.data?.beverages,
+        return RefreshIndicator(
+          child: shopItemBuilder(
+            menuModel: cubit.menuModel?.data?.beverages,
+          ),
+          onRefresh:  () => cubit.getMenuData(),
         );
       },
     );

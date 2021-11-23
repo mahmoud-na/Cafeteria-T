@@ -25,6 +25,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../cafeteria_app_layout.dart';
 
 class CafeteriaCubit extends Cubit<CafeteriaStates> {
@@ -33,8 +34,11 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   static CafeteriaCubit get(context) => BlocProvider.of(context);
   bool isMyOrder = true;
   int navBarCurrentIndex = 0;
-  int timeNow = 0;
+  DateTime? dateAndTimeNow;
+
   var platFormType = Platform.operatingSystem;
+
+  bool isBottomSheetShown = false;
 
   List<Widget> screens = [
     const FoodScreen(),
@@ -50,6 +54,30 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     'حلويات',
   ];
 
+  void changeBottomSheetState({required bool isShow}) {
+    isBottomSheetShown = isShow;
+    emit(AppChangeBottomSheetState());
+  }
+
+  void navBarSweepToTheRight(){
+    navBarCurrentIndex+=1;
+    if(navBarCurrentIndex==screens.length){
+      navBarCurrentIndex=0;
+      changeBottomNav(navBarCurrentIndex);
+    }else{
+      changeBottomNav(navBarCurrentIndex);
+    }
+  }
+  void navBarSweepToTheLeft(){
+    navBarCurrentIndex-=1;
+    if(navBarCurrentIndex<0){
+      navBarCurrentIndex=screens.length-1;
+      changeBottomNav(navBarCurrentIndex);
+    }else{
+      changeBottomNav(navBarCurrentIndex);
+    }
+  }
+
   void findAndReplaceMenu({
     required List<ProductDataModel> list,
   }) {
@@ -62,9 +90,13 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     }
   }
 
-  Future<int> timeNowInHours() async => await NTP.now().then(
-        (value) => value.hour,
-      );
+  Future getDateAndTimeNow() async {
+    try {
+      return await NTP.now();
+    } catch (e) {
+      return null;
+    }
+  }
 
   ProductModel? menuModel;
 
@@ -206,18 +238,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       query: "EID:$uId,RequestUpdateOrder<EOF>",
     ).then((value) {
       myOrderModel = MyOrderModel.fromJson(value);
-      print("ccccccccccccccc");
-      print(
-          "sssssssssssssssssssssssssssssssssssssssssssssssssssssss ${myOrderModel!.data!.totalPrice}");
       myEditedOrderModel = MyOrderModel(data: myOrderModel!.data);
-      // myEditedOrderModel!.data = MyOrderDataModel(
-      //   dateTime: myOrderModel!.data!.dateTime,
-      //   orderList: myOrderModel!.data!.orderList,
-      //   orderNumber: myOrderModel!.data!.orderNumber,
-      //   timeAuthorization: myOrderModel!.data!.timeAuthorization,
-      //   totalPrice: myOrderModel!.data!.totalPrice,
-      // );
-
       emit(CafeteriaMyOrderSuccessState());
     }).catchError((error) {
       print(error.toString());
@@ -264,23 +285,21 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     return order;
   }
 
+  Future<void> refreshMyOrder() async {
+    await getMyOrderData();
+  }
+
   void postMyOrderData(BuildContext context) {
     emit(CafeteriaPostMyOrderLoadingState());
     SocketHelper.postData(
       query: "EID:$uId,Order,${sendOrder(
         myCartList: myCartDataModel!.products,
       )},EName:${userModel!.data!.name},TCost:${myCartDataModel!.totalPrice}<EOF>",
-    ).then((value) {
+    ).then((value) async {
       submitOrderResponseModel = SubmitOrderResponseModel.fromJson(value);
       if (submitOrderResponseModel!.data!.orderValid == 'true') {
-        CacheHelper.removeData(key: 'savedMyCartString').then((value) async {
-          await getMenuData().then((value) {
-            getMyOrderData();
-            emit(CafeteriaPostMyOrderSuccessState());
-          });
-        });
-        clearMyCart();
-        Navigator.pop(context);
+
+        emit(CafeteriaPostMyOrderSuccessState());
       } else {
         emit(CafeteriaPostMyOrderErrorState(
             submitOrderResponseModel!.data!.errMsg!));
@@ -300,16 +319,11 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
         myCartList: myEditedOrderModel!.data!.orderList,
       )},EName:${userModel!.data!.name},TCost:${myEditedOrderModel!.data!.totalPrice}<EOF>",
     ).then((value) async {
-      print("nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
       editOrderResponseModel = EditOrderResponseModel.fromJson(value);
-      print("qqqqqqqqqqqqqqqqqqqq");
-
       if (editOrderResponseModel!.data!.updateValid == 'true') {
-print("ssssssssssssssssssssssss");
         await getMyOrderData();
-print("rrrrrrrrrrrrrrrrrrrrrrr");
 
-emit(CafeteriaEditMyOrderSuccessState());
+        emit(CafeteriaEditMyOrderSuccessState());
       } else {
         emit(CafeteriaEditMyOrderErrorState(
             editOrderResponseModel!.data!.errorMessage!));
@@ -321,7 +335,8 @@ emit(CafeteriaEditMyOrderSuccessState());
   }
 
   Widget shopItemRemoveIcon(var model, context) {
-    if (model.counter > 0 && timeNow < timeLimitAllowed) {
+    if (model.counter > 0 &&
+        (dateAndTimeNow?.hour ?? errorTempTime) < timeLimitAllowed) {
       return IconButton(
         onPressed: () {
           decrementMenuItemCounter(model, context);
@@ -334,17 +349,19 @@ emit(CafeteriaEditMyOrderSuccessState());
       );
     } else {
       return const IconButton(
-          onPressed: null,
-          icon: Icon(
-            Icons.remove_circle_outline,
-            size: 40.0,
-            color: Colors.grey,
-          ));
+        onPressed: null,
+        icon: Icon(
+          Icons.remove_circle_outline,
+          size: 40.0,
+          color: Colors.grey,
+        ),
+      );
     }
   }
 
   Widget shopItemAddIcon(var model) {
-    if (model.counter < 1000 && timeNow < timeLimitAllowed) {
+    if (model.counter < 1000 &&
+        (dateAndTimeNow?.hour ?? errorTempTime) < timeLimitAllowed) {
       return IconButton(
         onPressed: () {
           incrementMenuItemCounter(model);
@@ -378,10 +395,7 @@ emit(CafeteriaEditMyOrderSuccessState());
     if (model.runtimeType == MyOrderListModel) {
       myEditedOrderModel!.data!.totalPrice =
           myEditedOrderModel!.data!.totalPrice! + model.price;
-      print("myEditedOrderModel  ${myEditedOrderModel!.data!.totalPrice}");
-      print("myOrderModel  ${myOrderModel!.data!.totalPrice}");
     } else {
-      print(model.runtimeType);
       addToCart(model);
     }
 
@@ -410,6 +424,9 @@ emit(CafeteriaEditMyOrderSuccessState());
           ),
         ),
       );
+      if (myCartDataModel!.lastUpdateTime != dateAndTimeNow!.day) {
+        clearMyCart();
+      }
     } else {
       clearMyCart();
     }
@@ -418,6 +435,9 @@ emit(CafeteriaEditMyOrderSuccessState());
   void addToCart(ProductDataModel menuModel) {
     if (menuModel.counter == 1) {
       myCartDataModel!.products.add(menuModel);
+      getDateAndTimeNow().then((value) {
+        myCartDataModel!.lastUpdateTime = value.day;
+      });
     }
     myCartDataModel!.totalItems = myCartDataModel!.totalItems + 1;
     myCartDataModel!.totalPrice = myCartDataModel!.totalPrice + menuModel.price;
@@ -426,14 +446,17 @@ emit(CafeteriaEditMyOrderSuccessState());
     print(savedMyCartString);
   }
 
-  void removeFromCart(ProductDataModel menuModel, BuildContext context) {
+  Future<void> removeFromCart(
+      ProductDataModel menuModel, BuildContext context) async {
     if (menuModel.counter == 0) {
       myCartDataModel!.products.remove(menuModel);
+      getDateAndTimeNow().then((value) {
+        myCartDataModel!.lastUpdateTime = value.day;
+      });
       if (myCartDataModel!.products.isEmpty) {
         Navigator.of(context).maybePop();
       }
     }
-
     myCartDataModel!.totalItems = myCartDataModel!.totalItems - 1;
     myCartDataModel!.totalPrice = myCartDataModel!.totalPrice - menuModel.price;
     String savedMyCartString = json.encode(myCartDataModel!.toMap());
@@ -441,13 +464,12 @@ emit(CafeteriaEditMyOrderSuccessState());
     print(savedMyCartString);
   }
 
-  void clearMyCart() {
-    Map<String, dynamic> myCart = {
-      "totalItems": 0,
-      "totalPrice": 0.0,
-      "list": [],
-    };
-    myCartDataModel = MyCartModel.fromJson(myCart);
+  clearMyCart() async {
+    myCartDataModel = MyCartModel.clear();
+    await CacheHelper.removeData(key: 'savedMyCartString').then((value) async {
+      await getMenuData();
+      emit(ClearMyCartSuccessState());
+    });
   }
 
   void getAppData() async {
@@ -457,6 +479,7 @@ emit(CafeteriaEditMyOrderSuccessState());
     await getMenuData();
     await getPreviousHistoryData();
     await getCurrentHistoryData();
+    qrImage = getQrImage();
   }
 
   String getQrCodeDataReady({
@@ -465,13 +488,25 @@ emit(CafeteriaEditMyOrderSuccessState());
   }) {
     List<dynamic> asciiArray = "Name is:$name \nUserID is:$userId".codeUnits;
     List<int> asciiArrayAfterMod = [];
-    asciiArray.forEach((value) {
+    for (var value in asciiArray) {
       asciiArrayAfterMod.add(((value + 5) * 5) - 55);
-    });
+    }
     final String qrData = String.fromCharCodes(asciiArrayAfterMod);
     return qrData;
   }
 
+  Widget getQrImage() => QrImage(
+        data: getQrCodeDataReady(
+          name: userModel?.data?.name ?? "",
+          userId: userModel?.data?.userId ?? "",
+        ),
+        errorCorrectionLevel: 3,
+        version: QrVersions.auto,
+        embeddedImage: const AssetImage('assets/images/Aio_Logo_original.png'),
+        embeddedImageStyle: QrEmbeddedImageStyle(
+          size: const Size(80, 80),
+        ),
+      );
   final imagePicker = ImagePicker();
   late File pickedImagePath;
 
@@ -589,8 +624,6 @@ emit(CafeteriaEditMyOrderSuccessState());
       });
     }
   }
-
-
 
   void reloadMyOrderData() {
     List<MyOrderListModel> originalOrderList = [];

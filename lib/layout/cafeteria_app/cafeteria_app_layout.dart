@@ -20,7 +20,7 @@ class CafeteriaHomeScreen extends StatelessWidget {
       listener: (context, state) {},
       builder: (context, state) {
         var cubit = CafeteriaCubit.get(context);
-        cubit.timeNowInHours().then((value) => cubit.timeNow = value);
+        cubit.getDateAndTimeNow().then((value) => cubit.dateAndTimeNow = value);
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
@@ -55,13 +55,23 @@ class CafeteriaHomeScreen extends StatelessWidget {
                     Icons.search,
                   ),
                 ),
-                const SizedBox(
-                  width: 12.0,
-                ),
+                // const SizedBox(
+                //   width: 12.0,
+                // ),
               ],
             ),
-            body: cubit.screens[cubit.navBarCurrentIndex],
-            drawer: const MyDrawer(),
+            body: GestureDetector(
+              child: cubit.screens[cubit.navBarCurrentIndex],
+              onHorizontalDragEnd: (details) {
+                if (details.primaryVelocity! > 0.0) {
+                  cubit.navBarSweepToTheRight();
+                }
+                if (details.primaryVelocity! < 0) {
+                  cubit.navBarSweepToTheLeft();
+                }
+              },
+            ),
+            drawer: MyDrawer(),
             bottomNavigationBar: BottomAppBar(
               shape: const CircularNotchedRectangle(),
               child: BottomNavigationBar(

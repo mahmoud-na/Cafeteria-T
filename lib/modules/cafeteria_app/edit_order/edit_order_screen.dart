@@ -13,28 +13,61 @@ class MyOrderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CafeteriaCubit, CafeteriaStates>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is CafeteriaEditMyOrderLoadingState) {
+          Navigator.pop(context);
+          defaultShowDialog(
+            closeable: false,
+            context: context,
+            content: "جاري تعديل الطلب برجاء الإنتظار...",
+            title: 'تعديل الطلب',
+            icon: const CircularProgressIndicator(),
+          );
+        }
+        if (state is CafeteriaEditMyOrderErrorState) {
+          Navigator.pop(context);
+          defaultShowDialog(
+            context: context,
+            content: 'لم يتم قبول تعديل الطلب برجاء المحاولة مرة اخرى',
+            title: 'تعديل الطلب',
+            icon: const Icon(
+              Icons.error,
+              color: Colors.red,
+              size: 40,
+            ),
+          );
+        }
+      },
       builder: (context, state) {
         var cubit = CafeteriaCubit.get(context);
-        return ConditionalBuilder(
-          condition: state is! CafeteriaMyOrderLoadingState,
-          builder: (context) => Scaffold(
-            appBar: AppBar(
-              title: const Text("طلب اليوم"),
-              titleSpacing: 5.0,
-              leading: IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(
-                  IconBroken.Arrow___Right_2,
-                ),
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text("طلب اليوم"),
+            titleSpacing: 5.0,
+            leading: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(
+                IconBroken.Arrow___Right_2,
               ),
             ),
-            body: Padding(
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: 10.0,
+                ),
+                child: defaultQrIconButton(
+                  context: context,
+                ),
+              ),
+            ],
+          ),
+          body: ConditionalBuilder(
+            condition: state is! CafeteriaMyOrderLoadingState,
+            builder: (context) => Padding(
               padding: const EdgeInsets.all(20.0),
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
+              child: RefreshIndicator(
                 child: Column(
                   children: [
                     myCartSummery(
@@ -42,18 +75,31 @@ class MyOrderScreen extends StatelessWidget {
                           cubit.myEditedOrderModel?.data!.totalPrice,
                       context: context,
                     ),
-                    shopItemBuilder(
-                      menuModel: cubit.myEditedOrderModel?.data!.orderList,
+                    const SizedBox(
+                      height: 10.0,
+                    ),
+                    Expanded(
+                      child: shopItemBuilder(
+                        menuModel: cubit.myEditedOrderModel?.data!.orderList,
+                      ),
                     ),
                     const SizedBox(
-                      height: 60.0,
+                      height: 40.0,
                     ),
                   ],
                 ),
+                onRefresh: () => cubit.getMyOrderData(),
               ),
             ),
-            floatingActionButton: cubit.timeNow < timeLimitAllowed
-                ? Padding(
+            fallback: (context) => const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+          floatingActionButton: (cubit.dateAndTimeNow?.hour ?? errorTempTime) <
+                  timeLimitAllowed
+              ? ConditionalBuilder(
+                  condition: state is! CafeteriaMyOrderLoadingState,
+                  builder: (context) => Padding(
                     padding: const EdgeInsets.all(
                       10.0,
                     ),
@@ -68,7 +114,19 @@ class MyOrderScreen extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          cubit.editMyOrderData();
+                          defaultShowDialog(
+                            context: context,
+                            content: "هل أنت متأكد من تعديل طلبك",
+                            title: 'تعديل الطلب',
+                            actions: [
+                              defaultAlertActionButtons(
+                                context: context,
+                                onPressed: () {
+                                  cubit.editMyOrderData();
+                                },
+                              ),
+                            ],
+                          );
                         },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -96,14 +154,14 @@ class MyOrderScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                  )
-                : null,
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked,
-          ),
-          fallback: (context) => const Center(
-            child: CircularProgressIndicator(),
-          ),
+                  ),
+                  fallback: (context) {
+                    return const SizedBox();
+                  },
+                )
+              : null,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
         );
       },
     );
