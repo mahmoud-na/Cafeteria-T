@@ -59,21 +59,22 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     emit(AppChangeBottomSheetState());
   }
 
-  void navBarSweepToTheRight(){
-    navBarCurrentIndex+=1;
-    if(navBarCurrentIndex==screens.length){
-      navBarCurrentIndex=0;
+  void navBarSweepToTheRight() {
+    navBarCurrentIndex += 1;
+    if (navBarCurrentIndex == screens.length) {
+      navBarCurrentIndex = 0;
       changeBottomNav(navBarCurrentIndex);
-    }else{
+    } else {
       changeBottomNav(navBarCurrentIndex);
     }
   }
-  void navBarSweepToTheLeft(){
-    navBarCurrentIndex-=1;
-    if(navBarCurrentIndex<0){
-      navBarCurrentIndex=screens.length-1;
+
+  void navBarSweepToTheLeft() {
+    navBarCurrentIndex -= 1;
+    if (navBarCurrentIndex < 0) {
+      navBarCurrentIndex = screens.length - 1;
       changeBottomNav(navBarCurrentIndex);
-    }else{
+    } else {
       changeBottomNav(navBarCurrentIndex);
     }
   }
@@ -102,7 +103,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
 
   Future<void> getMenuData() async {
     emit(CafeteriaMenuLoadingState());
-    await SocketHelper.getData(query: "EID:$uId,DayMenu<EOF>").then((value) {
+    await SocketHelper.getData(query: "EID:$userId,DayMenu<EOF>").then((value) {
       menuModel = ProductModel.fromJson(value);
       if (myCartDataModel!.totalItems != 0) {
         findAndReplaceMenu(list: menuModel!.data!.food);
@@ -117,29 +118,29 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     });
   }
 
-  UserModel? userModel;
+  // UserModel? userModel;
 
-  Future<void> getUserData({
-    required String activationCode,
-  }) async {
-    emit(CafeteriaUserDataLoadingState());
-    await SocketHelper.getData(query: "EID:0,ACTCODE:$activationCode<EOF>")
-        .then((value) {
-      userModel = UserModel.fromJson(value);
-      uId = userModel!.data!.userId!;
-      if (CacheHelper.getData(key: 'profileImageUrl') != null) {
-        userModel!.data!.profileImage =
-            CacheHelper.getData(key: 'profileImageUrl');
-      }
-      if (CacheHelper.getData(key: 'coverImageUrl') != null) {
-        userModel!.data!.coverImage = CacheHelper.getData(key: 'coverImageUrl');
-      }
-      emit(CafeteriaUserDataSuccessState());
-    }).catchError((error) {
-      print(error.toString());
-      emit(CafeteriaUserDataErrorState(error.toString()));
-    });
-  }
+  // Future<void> getUserData({
+  //   required String activationCode,
+  // }) async {
+  //   emit(CafeteriaUserDataLoadingState());
+  //   await SocketHelper.getData(query: "EID:0,ACTCODE:$activationCode<EOF>")
+  //       .then((value) {
+  //     userModel = UserModel.fromJson(value);
+  //     uId = userModel!.data!.userId!;
+  //     if (CacheHelper.getData(key: 'profileImageUrl') != null) {
+  //       userModel!.data!.profileImage =
+  //           CacheHelper.getData(key: 'profileImageUrl');
+  //     }
+  //     if (CacheHelper.getData(key: 'coverImageUrl') != null) {
+  //       userModel!.data!.coverImage = CacheHelper.getData(key: 'coverImageUrl');
+  //     }
+  //     emit(CafeteriaUserDataSuccessState());
+  //   }).catchError((error) {
+  //     print(error.toString());
+  //     emit(CafeteriaUserDataErrorState(error.toString()));
+  //   });
+  // }
 
   List<HistoryDataModel> historySorting(
     List<HistoryDataModel> tmpHistorySorting,
@@ -191,7 +192,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
 
   Future<void> getCurrentHistoryData() async {
     emit(CafeteriaCurrentHistoryLoadingState());
-    await SocketHelper.getData(query: "EID:$uId,CurrentHistory<EOF>")
+    await SocketHelper.getData(query: "EID:$userId,CurrentHistory<EOF>")
         .then((value) {
       currentHistoryModel = HistoryModel.fromJson(value, "CurrentHistory");
       currentHistoryModel!.data = historySorting(currentHistoryModel!.data);
@@ -207,7 +208,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   Future<void> getPreviousHistoryData() async {
     emit(CafeteriaPreviousHistoryLoadingState());
     await SocketHelper.getData(
-      query: "EID:$uId,PreviousHistory<EOF>",
+      query: "EID:$userId,PreviousHistory<EOF>",
     ).then((value) {
       previousHistoryModel = HistoryModel.fromJson(value, "PreviousHistory");
       previousHistoryModel!.data = historySorting(previousHistoryModel!.data);
@@ -235,7 +236,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   Future<void> getMyOrderData() async {
     emit(CafeteriaMyOrderLoadingState());
     await SocketHelper.postData(
-      query: "EID:$uId,RequestUpdateOrder<EOF>",
+      query: "EID:$userId,RequestUpdateOrder<EOF>",
     ).then((value) {
       myOrderModel = MyOrderModel.fromJson(value);
       myEditedOrderModel = MyOrderModel(data: myOrderModel!.data);
@@ -292,13 +293,12 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   void postMyOrderData(BuildContext context) {
     emit(CafeteriaPostMyOrderLoadingState());
     SocketHelper.postData(
-      query: "EID:$uId,Order,${sendOrder(
+      query: "EID:$userId,Order,${sendOrder(
         myCartList: myCartDataModel!.products,
-      )},EName:${userModel!.data!.name},TCost:${myCartDataModel!.totalPrice}<EOF>",
+      )},EName:$userName,TCost:${myCartDataModel!.totalPrice}<EOF>",
     ).then((value) async {
       submitOrderResponseModel = SubmitOrderResponseModel.fromJson(value);
       if (submitOrderResponseModel!.data!.orderValid == 'true') {
-
         emit(CafeteriaPostMyOrderSuccessState());
       } else {
         emit(CafeteriaPostMyOrderErrorState(
@@ -315,9 +315,9 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   void editMyOrderData() {
     emit(CafeteriaEditMyOrderLoadingState());
     SocketHelper.postData(
-      query: "EID:$uId,UpdateOrder,${sendOrder(
+      query: "EID:$userId,UpdateOrder,${sendOrder(
         myCartList: myEditedOrderModel!.data!.orderList,
-      )},EName:${userModel!.data!.name},TCost:${myEditedOrderModel!.data!.totalPrice}<EOF>",
+      )},EName:$userName,TCost:${myEditedOrderModel!.data!.totalPrice}<EOF>",
     ).then((value) async {
       editOrderResponseModel = EditOrderResponseModel.fromJson(value);
       if (editOrderResponseModel!.data!.updateValid == 'true') {
@@ -416,7 +416,6 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   MyCartModel? myCartDataModel;
 
   Future<void> getMyCartData() async {
-    if (CacheHelper.getData(key: "savedMyCartString") != null) {
       myCartDataModel = MyCartModel.fromJson(
         jsonDecode(
           CacheHelper.getData(
@@ -424,12 +423,6 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
           ),
         ),
       );
-      if (myCartDataModel!.lastUpdateTime != dateAndTimeNow!.day) {
-        clearMyCart();
-      }
-    } else {
-      clearMyCart();
-    }
   }
 
   void addToCart(ProductDataModel menuModel) {
@@ -467,15 +460,23 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   clearMyCart() async {
     myCartDataModel = MyCartModel.clear();
     await CacheHelper.removeData(key: 'savedMyCartString').then((value) async {
-      await getMenuData();
       emit(ClearMyCartSuccessState());
     });
+
+
   }
 
-  void getAppData() async {
-    await getUserData(activationCode: "ih");
+  Future<void> getAppData() async {
     await getMyOrderData();
-    await getMyCartData();
+    if (CacheHelper.getData(key: "savedMyCartString") != null) {
+      await getMyCartData();
+      if (myCartDataModel!.lastUpdateTime != dateAndTimeNow?.day) {
+        await clearMyCart();
+      }
+    }else{
+      myCartDataModel = MyCartModel.clear();
+    }
+
     await getMenuData();
     await getPreviousHistoryData();
     await getCurrentHistoryData();
@@ -497,8 +498,8 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
 
   Widget getQrImage() => QrImage(
         data: getQrCodeDataReady(
-          name: userModel?.data?.name ?? "",
-          userId: userModel?.data?.userId ?? "",
+          name: userName ?? "",
+          userId: userId ?? "",
         ),
         errorCorrectionLevel: 3,
         version: QrVersions.auto,
@@ -552,11 +553,11 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   }) {
     if (isProfilePicture) {
       FirebaseStorage.instance
-          .refFromURL(userModel!.data!.profileImage)
+          .refFromURL(userProfileImage!)
           .delete()
           .then((value) {
             CacheHelper.removeData(key: 'profileImageUrl');
-            userModel!.data!.profileImage = '';
+            userProfileImage = '';
           })
           .then((value) => emit(CafeteriaRemoveImageSuccessState()))
           .catchError((error) {
@@ -565,11 +566,11 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
           });
     } else {
       FirebaseStorage.instance
-          .refFromURL(userModel!.data!.coverImage)
+          .refFromURL(userCoverImage!)
           .delete()
           .then((value) {
             CacheHelper.removeData(key: 'coverImageUrl');
-            userModel!.data!.coverImage = '';
+            userCoverImage = '';
           })
           .then((value) => emit(CafeteriaRemoveImageSuccessState()))
           .catchError((error) {
@@ -587,13 +588,12 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
 
     if (isProfilePicture) {
       Reference ref = storageReference.ref().child(
-            'ProfilesPics/${userModel!.data!.name}:${userModel!.data!.userId}',
+            'ProfilesPics/$userName:$userId',
           );
       UploadTask uploadTask = ref.putFile(newImage);
       await uploadTask.then((res) {
         res.ref.getDownloadURL().then((fileURL) {
-          userModel!.data!.profileImage = fileURL;
-
+          userProfileImage = fileURL;
           CacheHelper.saveData(key: 'profileImageUrl', value: fileURL).then(
             (value) {
               emit(CafeteriaUploadProfileImageToFirebaseSuccessState());
@@ -606,12 +606,12 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       });
     } else {
       Reference ref = storageReference.ref().child(
-            'drawerBGimages/${userModel!.data!.name}:${userModel!.data!.userId}',
+            'drawerBGimages/$userName:$userId',
           );
       UploadTask uploadTask = ref.putFile(newImage);
       uploadTask.then((res) {
         res.ref.getDownloadURL().then((fileURL) {
-          userModel!.data!.coverImage = fileURL;
+          userCoverImage = fileURL;
           CacheHelper.saveData(key: 'coverImageUrl', value: fileURL).then(
             (value) {
               emit(CafeteriaUploadCoverImageToFirebaseSuccessState());

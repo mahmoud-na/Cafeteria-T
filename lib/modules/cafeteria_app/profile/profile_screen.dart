@@ -55,7 +55,8 @@ class profileScreen extends StatelessWidget {
                           child: SizedBox(
                             height: 160.0,
                             child: CachedNetworkImage(
-                              imageUrl:cubit.userModel!=null? cubit.userModel!.data!.coverImage:'',
+                              imageUrl:
+                                  userCoverImage != null ? userCoverImage! : '',
                               imageBuilder: (context, imageProvider) =>
                                   Container(
                                 decoration: BoxDecoration(
@@ -119,7 +120,9 @@ class profileScreen extends StatelessWidget {
                             );
                           },
                           child: CachedNetworkImage(
-                            imageUrl: cubit.userModel?.data?.profileImage??"",
+                            imageUrl: userProfileImage != null
+                                ? userProfileImage!
+                                : "",
                             imageBuilder: (context, imageProvider) => Container(
                               height: 128.0,
                               width: 128.0,
@@ -164,7 +167,7 @@ class profileScreen extends StatelessWidget {
                 ),
                 Center(
                   child: Text(
-                    "${cubit.userModel?.data?.name}",
+                    userName!,
                     style: Theme.of(context).textTheme.bodyText1,
                   ),
                 ),
@@ -213,15 +216,18 @@ class profileScreen extends StatelessWidget {
                     child: const Text('الكاميرا'),
                     onPressed: () {
                       Navigator.pop(context);
-                      cubit.takeImageFromCamera(isProfilePicture: isProfilePicture,);
+                      cubit.takeImageFromCamera(
+                        isProfilePicture: isProfilePicture,
+                      );
                     },
                   ),
                   CupertinoActionSheetAction(
                     child: const Text('الصور'),
                     onPressed: () async {
                       Navigator.pop(context);
-                      await cubit.chooseImageFromGallery(isProfilePicture: isProfilePicture,);
-
+                      await cubit.chooseImageFromGallery(
+                        isProfilePicture: isProfilePicture,
+                      );
                     },
                   ),
                   CupertinoActionSheetAction(
@@ -248,7 +254,9 @@ class profileScreen extends StatelessWidget {
                     title: 'الكاميرا',
                     onTap: () {
                       Navigator.pop(context);
-                      cubit.takeImageFromCamera(isProfilePicture: isProfilePicture,);
+                      cubit.takeImageFromCamera(
+                        isProfilePicture: isProfilePicture,
+                      );
                     },
                     icon: const Icon(
                       Icons.camera_alt,
@@ -258,7 +266,9 @@ class profileScreen extends StatelessWidget {
                     title: 'الصور',
                     onTap: () {
                       Navigator.pop(context);
-                      cubit.chooseImageFromGallery(isProfilePicture: isProfilePicture,);
+                      cubit.chooseImageFromGallery(
+                        isProfilePicture: isProfilePicture,
+                      );
                     },
                     icon: const Icon(
                       Icons.photo_album,
@@ -291,7 +301,9 @@ class profileScreen extends StatelessWidget {
                     title: 'الكاميرا',
                     onTap: () {
                       Navigator.pop(context);
-                      cubit.takeImageFromCamera(isProfilePicture: isProfilePicture,);
+                      cubit.takeImageFromCamera(
+                        isProfilePicture: isProfilePicture,
+                      );
                     },
                     icon: const Icon(
                       Icons.camera_alt,
@@ -301,7 +313,9 @@ class profileScreen extends StatelessWidget {
                     title: 'الصور',
                     onTap: () {
                       Navigator.pop(context);
-                      cubit.chooseImageFromGallery(isProfilePicture: isProfilePicture,);
+                      cubit.chooseImageFromGallery(
+                        isProfilePicture: isProfilePicture,
+                      );
                     },
                     icon: const Icon(
                       Icons.photo_album,
@@ -311,7 +325,9 @@ class profileScreen extends StatelessWidget {
                     title: 'إحذف الصورة',
                     onTap: () {
                       Navigator.pop(context);
-                      cubit.deleteImage(isProfilePicture: isProfilePicture,);
+                      cubit.deleteImage(
+                        isProfilePicture: isProfilePicture,
+                      );
                     },
                     icon: const Icon(
                       Icons.broken_image_outlined,
