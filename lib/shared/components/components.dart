@@ -10,24 +10,30 @@ import 'package:cafeteriat/shared/styles/icon_broken.dart';
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 Widget defaultButton({
   double width = double.infinity,
+  double height = 40.0,
   bool isUpperCase = true,
   double borderRadius = 3.0,
   required VoidCallback onPressed,
   required String text,
+  required BuildContext context,
 }) =>
     Container(
       width: width,
-      height: 40.0,
+      height: height,
       child: MaterialButton(
         onPressed: onPressed,
         child: Text(
           isUpperCase ? text.toUpperCase() : text,
-          style: const TextStyle(color: Colors.white),
+          style: Theme.of(context).textTheme.headline6!.copyWith(
+                color: Colors.white,
+              ),
         ),
       ),
       decoration: BoxDecoration(
@@ -42,7 +48,14 @@ Widget defaultTextButton({
 }) =>
     TextButton(
       onPressed: onPressed,
-      child: Text(text.toUpperCase()),
+      child: Text(
+        text,
+        textDirection: TextDirection.rtl,
+      ),
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.zero,
+        alignment: Alignment.centerRight,
+      ),
     );
 
 PreferredSizeWidget defaultAppBar({
@@ -85,7 +98,7 @@ Widget defaultFormField({
       onFieldSubmitted: onFieldSubmitted,
       onChanged: onChanged,
       onTap: onTap,
-      focusNode: FocusNode(),
+      maxLength: 6,
       enableInteractiveSelection: enableInteractiveSelection,
       decoration: InputDecoration(
         labelText: labelText,
@@ -93,6 +106,7 @@ Widget defaultFormField({
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
       ),
+      // maxLengthEnforcement:MaxLengthEnforcement.enforced ,
     );
 
 Widget defaultListTile({
@@ -308,7 +322,8 @@ Widget shopItemBuilder({
   return ConditionalBuilder(
     condition: menuModel != null,
     builder: (context) => ListView.separated(
-      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+      physics:
+          const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       // shrinkWrap: true,
       itemBuilder: (context, index) => shopItem(
         menuModel: menuModel[index],
@@ -548,7 +563,7 @@ Future<void> defaultShowDialog({
   required BuildContext context,
   required String title,
   required String content,
-   VoidCallback? toDoAfterClosing ,
+  VoidCallback? toDoAfterClosing,
   bool closeable = true,
   Widget? icon,
   List<Widget>? actions,
@@ -607,7 +622,7 @@ Future<void> defaultShowDialog({
         ),
       ).then(
         (value) {
-          if(toDoAfterClosing!=null){
+          if (toDoAfterClosing != null) {
             toDoAfterClosing();
           }
         },

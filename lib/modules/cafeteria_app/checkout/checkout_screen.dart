@@ -55,6 +55,7 @@ class CheckOutScreen extends StatelessWidget {
             ),
              toDoAfterClosing: () async {
                await CafeteriaCubit.get(context).clearMyCart();
+               await CafeteriaCubit.get(context).getMenuData();
              },
           );
           await CafeteriaCubit.get(context).refreshMyOrder();
@@ -85,8 +86,9 @@ class CheckOutScreen extends StatelessWidget {
                     actions: [
                       defaultAlertActionButtons(
                         context: context,
-                        onPressed: () {
+                        onPressed: () async {
                           cubit.clearMyCart();
+                          cubit.getMenuData();
                           Navigator.pop(context);
                         },
                       ),

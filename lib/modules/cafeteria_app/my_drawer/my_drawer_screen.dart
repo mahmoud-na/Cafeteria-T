@@ -3,18 +3,21 @@ import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/states.dart';
 import 'package:cafeteriat/modules/cafeteria_app/about/about_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/current_history/current_history_screen.dart';
+import 'package:cafeteriat/modules/cafeteria_app/loading/loading_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/login/login_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/previous_history/previous_history_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/profile/profile_screen.dart';
 import 'package:cafeteriat/shared/components/components.dart';
+import 'package:cafeteriat/shared/components/constants.dart';
 import 'package:cafeteriat/shared/cubit/cubit.dart';
 import 'package:cafeteriat/shared/network/local/cache_helper.dart';
-import 'package:cafeteriat/shared/styles/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../main.dart';
+
 class MyDrawer extends StatelessWidget {
-  MyDrawer({Key? key}) : super(key: key);
+  const MyDrawer({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +34,7 @@ class MyDrawer extends StatelessWidget {
               ),
               Center(
                 child: Text(
-                  "${cubit.userModel?.data?.name}",
+                  "$userName",
                   style: Theme.of(context).textTheme.bodyText1,
                 ),
               ),
@@ -89,30 +92,29 @@ class MyDrawer extends StatelessWidget {
                 ),
                 child: OutlinedButton(
                   onPressed: () {
-                    CacheHelper.removeAllData().then((value) {
-                      defaultShowDialog(
-                        context: context,
-                        title: "تسجيل خروج",
-                        content: "هل انت متأكد من تسجيلك للخروج",
-                        icon: const Icon(
-                          Icons.error,
-                          color: Colors.red,
-                          size: 40,
+                    defaultShowDialog(
+                      context: context,
+                      title: "تسجيل خروج",
+                      content: "هل انت متأكد من تسجيلك للخروج",
+                      icon: const Icon(
+                        Icons.error,
+                        color: Colors.red,
+                        size: 40,
+                      ),
+                      actions: [
+                        defaultAlertActionButtons(
+                          context: context,
+                          onPressed: () async {
+                           await CacheHelper.removeAllData();
+                            navigateAndReplace(
+                              context,
+                              CafeteriaLoginScreen(),
+                            );
+                          },
                         ),
-                        actions: [
-                          defaultAlertActionButtons(
-                            context: context,
-                            onPressed: () {
-                              navigateAndReplace(
-                                context,
-                                const LoginScreen(),
-                              );
-                            },
-                          ),
-                        ],
-                      );
+                      ],
+                    );
 
-                    });
                   },
                   child: const Text(
                     "تسجيل الخروخ",
@@ -137,7 +139,7 @@ class MyDrawer extends StatelessWidget {
               child: SizedBox(
                 height: 160.0,
                 child: CachedNetworkImage(
-                  imageUrl: cubit.userModel?.data?.coverImage ?? '',
+                  imageUrl: userCoverImage != null ? userCoverImage! : '',
                   imageBuilder: (context, imageProvider) => Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
@@ -174,7 +176,7 @@ class MyDrawer extends StatelessWidget {
               radius: 54.0,
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               child: CachedNetworkImage(
-                imageUrl: cubit.userModel?.data?.profileImage ?? '',
+                imageUrl: userProfileImage !=null ? userProfileImage! : '',
                 imageBuilder: (context, imageProvider) => Container(
                   height: 100.0,
                   width: 100.0,

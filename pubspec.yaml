@@ -120,3 +120,6 @@ flutter:
     - family: IconBroken
       fonts:
         - asset: assets/fonts/icons.ttf
+    - family: ElMessiri
+      fonts:
+        - asset: assets/fonts/ElMessiri-VariableFont_wght.ttf

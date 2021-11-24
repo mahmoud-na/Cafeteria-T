@@ -7,15 +7,18 @@ class UserModel {
 }
 
 class LoginDataModel {
-  String? activationValid;
+  bool? activationValid;
   String? name;
   String? userId;
-  String profileImage = "";
-  String coverImage = "";
+  // String profileImage = "";
+  // String coverImage = "";
 
   LoginDataModel.fromJson(Map<String, dynamic> json) {
     activationValid = json['activationValid'];
     name = json['Name'];
     userId = json['ID'];
   }
+
+
+
 }
