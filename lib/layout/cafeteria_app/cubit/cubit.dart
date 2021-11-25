@@ -79,6 +79,11 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     }
   }
 
+  void changeBottomNav(int index) {
+    navBarCurrentIndex = index;
+    emit(CafeteriaChangeNavBarState());
+  }
+
   void findAndReplaceMenu({
     required List<ProductDataModel> list,
   }) {
@@ -118,33 +123,8 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     });
   }
 
-  // UserModel? userModel;
-
-  // Future<void> getUserData({
-  //   required String activationCode,
-  // }) async {
-  //   emit(CafeteriaUserDataLoadingState());
-  //   await SocketHelper.getData(query: "EID:0,ACTCODE:$activationCode<EOF>")
-  //       .then((value) {
-  //     userModel = UserModel.fromJson(value);
-  //     uId = userModel!.data!.userId!;
-  //     if (CacheHelper.getData(key: 'profileImageUrl') != null) {
-  //       userModel!.data!.profileImage =
-  //           CacheHelper.getData(key: 'profileImageUrl');
-  //     }
-  //     if (CacheHelper.getData(key: 'coverImageUrl') != null) {
-  //       userModel!.data!.coverImage = CacheHelper.getData(key: 'coverImageUrl');
-  //     }
-  //     emit(CafeteriaUserDataSuccessState());
-  //   }).catchError((error) {
-  //     print(error.toString());
-  //     emit(CafeteriaUserDataErrorState(error.toString()));
-  //   });
-  // }
-
   List<HistoryDataModel> historySorting(
-    List<HistoryDataModel> tmpHistorySorting,
-  ) {
+      List<HistoryDataModel> tmpHistorySorting,) {
     var tmp;
     for (int i = 0; i < tmpHistorySorting.length; i++) {
       for (int j = 0; j < tmpHistorySorting.length - 1; j++) {
@@ -161,7 +141,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
             tmpHistorySorting[j] = tmpHistorySorting[j + 1];
             tmpHistorySorting[j + 1] = tmp;
           } else if (int.parse(
-                  tmpHistorySorting[j].dateTime!.substring(12, 14)) ==
+              tmpHistorySorting[j].dateTime!.substring(12, 14)) ==
               int.parse(tmpHistorySorting[j + 1].dateTime!.substring(12, 14))) {
             if (int.parse(tmpHistorySorting[j].dateTime!.substring(15, 17)) <
                 int.parse(
@@ -170,7 +150,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
               tmpHistorySorting[j] = tmpHistorySorting[j + 1];
               tmpHistorySorting[j + 1] = tmp;
             } else if (int.parse(
-                    tmpHistorySorting[j].dateTime!.substring(15, 17)) ==
+                tmpHistorySorting[j].dateTime!.substring(15, 17)) ==
                 int.parse(
                     tmpHistorySorting[j + 1].dateTime!.substring(15, 17))) {
               if (int.parse(tmpHistorySorting[j].dateTime!.substring(18, 20)) <
@@ -320,7 +300,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       )},EName:$userName,TCost:${myEditedOrderModel!.data!.totalPrice}<EOF>",
     ).then((value) async {
       editOrderResponseModel = EditOrderResponseModel.fromJson(value);
-        emit(CafeteriaEditMyOrderSuccessState());
+      emit(CafeteriaEditMyOrderSuccessState());
     }).catchError((error) {
       print(error.toString());
       emit(CafeteriaEditMyOrderErrorState(error.toString()));
@@ -377,14 +357,8 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     }
   }
 
-  void changeBottomNav(int index) {
-    navBarCurrentIndex = index;
-    emit(CafeteriaChangeNavBarState());
-  }
-
   void incrementMenuItemCounter(var model) {
     model.counter = model.counter + 1;
-
     if (model.runtimeType == MyOrderListModel) {
       myEditedOrderModel!.data!.totalPrice =
           myEditedOrderModel!.data!.totalPrice! + model.price;
@@ -409,21 +383,23 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   MyCartModel? myCartDataModel;
 
   Future<void> getMyCartData() async {
-      myCartDataModel = MyCartModel.fromJson(
-        jsonDecode(
-          CacheHelper.getData(
-            key: "savedMyCartString",
-          ),
+    myCartDataModel = MyCartModel.fromJson(
+      jsonDecode(
+        CacheHelper.getData(
+          key: "savedMyCartString",
         ),
-      );
+      ),
+    );
   }
 
   void addToCart(ProductDataModel menuModel) {
     if (menuModel.counter == 1) {
       myCartDataModel!.products.add(menuModel);
-      getDateAndTimeNow().then((value) {
-        myCartDataModel!.lastUpdateTime = value.day;
-      });
+      getDateAndTimeNow().then(
+            (value) {
+          myCartDataModel!.lastUpdateTime = value.day;
+        },
+      );
     }
     myCartDataModel!.totalItems = myCartDataModel!.totalItems + 1;
     myCartDataModel!.totalPrice = myCartDataModel!.totalPrice + menuModel.price;
@@ -432,8 +408,8 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     print(savedMyCartString);
   }
 
-  Future<void> removeFromCart(
-      ProductDataModel menuModel, BuildContext context) async {
+  Future<void> removeFromCart(ProductDataModel menuModel,
+      BuildContext context) async {
     if (menuModel.counter == 0) {
       myCartDataModel!.products.remove(menuModel);
       getDateAndTimeNow().then((value) {
@@ -455,8 +431,6 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     await CacheHelper.removeData(key: 'savedMyCartString').then((value) async {
       emit(ClearMyCartSuccessState());
     });
-
-
   }
 
   Future<void> getAppData() async {
@@ -466,7 +440,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       if (myCartDataModel!.lastUpdateTime != dateAndTimeNow?.day) {
         await clearMyCart();
       }
-    }else{
+    } else {
       myCartDataModel = MyCartModel.clear();
     }
 
@@ -489,7 +463,8 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     return qrData;
   }
 
-  Widget getQrImage() => QrImage(
+  Widget getQrImage() =>
+      QrImage(
         data: getQrCodeDataReady(
           name: userName ?? "",
           userId: userId ?? "",
@@ -534,7 +509,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
         newImage: pickedImagePath,
         isProfilePicture: isProfilePicture,
       ).then(
-        (value) => emit(CafeteriaChangeCoverImageSuccessState()),
+            (value) => emit(CafeteriaChangeCoverImageSuccessState()),
       );
     } else {
       emit(CafeteriaChangeCoverImageErrorState());
@@ -549,27 +524,27 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
           .refFromURL(userProfileImage!)
           .delete()
           .then((value) {
-            CacheHelper.removeData(key: 'profileImageUrl');
-            userProfileImage = '';
-          })
+        CacheHelper.removeData(key: 'profileImageUrl');
+        userProfileImage = '';
+      })
           .then((value) => emit(CafeteriaRemoveImageSuccessState()))
           .catchError((error) {
-            print(error.toString());
-            emit(CafeteriaRemoveImageErrorState(error.toString()));
-          });
+        print(error.toString());
+        emit(CafeteriaRemoveImageErrorState(error.toString()));
+      });
     } else {
       FirebaseStorage.instance
           .refFromURL(userCoverImage!)
           .delete()
           .then((value) {
-            CacheHelper.removeData(key: 'coverImageUrl');
-            userCoverImage = '';
-          })
+        CacheHelper.removeData(key: 'coverImageUrl');
+        userCoverImage = '';
+      })
           .then((value) => emit(CafeteriaRemoveImageSuccessState()))
           .catchError((error) {
-            print(error.toString());
-            emit(CafeteriaRemoveImageErrorState(error.toString()));
-          });
+        print(error.toString());
+        emit(CafeteriaRemoveImageErrorState(error.toString()));
+      });
     }
   }
 
@@ -581,14 +556,14 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
 
     if (isProfilePicture) {
       Reference ref = storageReference.ref().child(
-            'ProfilesPics/$userName:$userId',
-          );
+        'ProfilesPics/$userName:$userId',
+      );
       UploadTask uploadTask = ref.putFile(newImage);
       await uploadTask.then((res) {
         res.ref.getDownloadURL().then((fileURL) {
           userProfileImage = fileURL;
           CacheHelper.saveData(key: 'profileImageUrl', value: fileURL).then(
-            (value) {
+                (value) {
               emit(CafeteriaUploadProfileImageToFirebaseSuccessState());
             },
           );
@@ -599,14 +574,14 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       });
     } else {
       Reference ref = storageReference.ref().child(
-            'drawerBGimages/$userName:$userId',
-          );
+        'drawerBGimages/$userName:$userId',
+      );
       UploadTask uploadTask = ref.putFile(newImage);
       uploadTask.then((res) {
         res.ref.getDownloadURL().then((fileURL) {
           userCoverImage = fileURL;
           CacheHelper.saveData(key: 'coverImageUrl', value: fileURL).then(
-            (value) {
+                (value) {
               emit(CafeteriaUploadCoverImageToFirebaseSuccessState());
             },
           );
@@ -636,5 +611,52 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       timeAuthorization: myOrderModel!.data!.timeAuthorization,
       totalPrice: myOrderModel!.data!.totalPrice,
     );
+  }
+
+  List<ProductDataModel> searchList = [];
+
+  void findMatch({
+    required List<ProductDataModel> list,
+    required String text,
+  }) {
+    for (int i = 0; i < list.length; i++) {
+      if (list[i].name!.contains(text)) {
+        searchList.add(list[i]);
+
+      }
+    }
+
+  }
+
+  void searchInMenu({
+    required String text,
+  }) {
+    emit(CafeteriaSearchLoadingState());
+    searchList = [];
+    findMatch(
+      list: menuModel!.data!.food,
+      text: text,
+    );
+    findMatch(
+      list: menuModel!.data!.snacks,
+      text: text,
+    );
+    findMatch(
+      list: menuModel!.data!.beverages,
+      text: text,
+    );
+    findMatch(
+      list: menuModel!.data!.desserts,
+      text: text,
+    );
+    searchList.forEach((element) {
+      print(element.name);
+    });
+    if(searchList.isNotEmpty){
+      emit(CafeteriaSearchSuccessState());
+    }else{
+      emit(CafeteriaSearchErrorState());
+    }
+
   }
 }

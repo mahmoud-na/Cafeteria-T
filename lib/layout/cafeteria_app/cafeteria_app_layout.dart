@@ -48,16 +48,13 @@ class CafeteriaHomeScreen extends StatelessWidget {
                   onPressed: () {
                     navigateTo(
                       context,
-                      const SearchScreen(),
+                       SearchScreen(),
                     );
                   },
                   icon: const Icon(
                     Icons.search,
                   ),
                 ),
-                // const SizedBox(
-                //   width: 12.0,
-                // ),
               ],
             ),
             body: GestureDetector(
@@ -71,7 +68,7 @@ class CafeteriaHomeScreen extends StatelessWidget {
                 }
               },
             ),
-            drawer: MyDrawer(),
+            drawer: const MyDrawer(),
             bottomNavigationBar: BottomAppBar(
               shape: const CircularNotchedRectangle(),
               child: BottomNavigationBar(

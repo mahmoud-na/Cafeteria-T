@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/states.dart';
 import 'package:cafeteriat/models/cafeteria_app/history_model.dart';
-import 'package:cafeteriat/models/cafeteria_app/product_model.dart';
 import 'package:cafeteriat/modules/cafeteria_app/current_history_order_details/current_history_order_details_screen.dart';
 import 'package:cafeteriat/shared/components/constants.dart';
 import 'package:cafeteriat/shared/styles/colors.dart';
@@ -82,6 +81,7 @@ Widget defaultFormField({
   required TextInputType textInputType,
   required String labelText,
   required Widget prefixIcon,
+  var maxLength=null,
   Widget? suffixIcon,
   bool obscureText = false,
   bool enableInteractiveSelection = true,
@@ -98,7 +98,7 @@ Widget defaultFormField({
       onFieldSubmitted: onFieldSubmitted,
       onChanged: onChanged,
       onTap: onTap,
-      maxLength: 6,
+      maxLength:maxLength,
       enableInteractiveSelection: enableInteractiveSelection,
       decoration: InputDecoration(
         labelText: labelText,
@@ -300,8 +300,11 @@ Widget shopItem({
                                 ),
                               ),
                               Expanded(
-                                  child: cubit.shopItemRemoveIcon(
-                                      menuModel, context)),
+                                child: cubit.shopItemRemoveIcon(
+                                  menuModel,
+                                  context,
+                                ),
+                              ),
                             ],
                           ),
                         ],
