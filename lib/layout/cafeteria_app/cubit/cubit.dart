@@ -320,14 +320,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       )},EName:$userName,TCost:${myEditedOrderModel!.data!.totalPrice}<EOF>",
     ).then((value) async {
       editOrderResponseModel = EditOrderResponseModel.fromJson(value);
-      if (editOrderResponseModel!.data!.updateValid == 'true') {
-        await getMyOrderData();
-
         emit(CafeteriaEditMyOrderSuccessState());
-      } else {
-        emit(CafeteriaEditMyOrderErrorState(
-            editOrderResponseModel!.data!.errorMessage!));
-      }
     }).catchError((error) {
       print(error.toString());
       emit(CafeteriaEditMyOrderErrorState(error.toString()));

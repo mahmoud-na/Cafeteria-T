@@ -1,3 +1,4 @@
+import 'package:cafeteriat/layout/cafeteria_app/cafeteria_app_layout.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/states.dart';
 import 'package:cafeteriat/shared/components/components.dart';
@@ -13,7 +14,7 @@ class MyOrderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CafeteriaCubit, CafeteriaStates>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is CafeteriaEditMyOrderLoadingState) {
           Navigator.pop(context);
           defaultShowDialog(
@@ -37,6 +38,27 @@ class MyOrderScreen extends StatelessWidget {
             ),
           );
         }
+        if (state is CafeteriaEditMyOrderSuccessState) {
+          if (CafeteriaCubit.get(context)
+                  .editOrderResponseModel!
+                  .data!
+                  .updateValid ==
+              'true') {
+            await CafeteriaCubit.get(context).getMyOrderData();
+            Navigator.pop(context);
+            showToast(msg: 'تم تعديل طلبك بنجاح', state: ToastStates.SUCCESS);
+          } else if (CafeteriaCubit.get(context)
+                  .editOrderResponseModel!
+                  .data!
+                  .updateValid ==
+              'false') {
+            Navigator.pop(context);
+            showToast(
+                msg:
+                    '${CafeteriaCubit.get(context).editOrderResponseModel!.data!.errorMessage}',
+                state: ToastStates.ERROR);
+          }
+        }
       },
       builder: (context, state) {
         var cubit = CafeteriaCubit.get(context);
@@ -46,7 +68,7 @@ class MyOrderScreen extends StatelessWidget {
             titleSpacing: 5.0,
             leading: IconButton(
               onPressed: () {
-                Navigator.pop(context);
+                navigateAndReplace(context, const CafeteriaHomeScreen());
               },
               icon: const Icon(
                 IconBroken.Arrow___Right_2,

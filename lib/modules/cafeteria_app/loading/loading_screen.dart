@@ -1,7 +1,9 @@
 import 'package:cafeteriat/layout/cafeteria_app/cafeteria_app_layout.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/modules/cafeteria_app/login/login_screen.dart';
+import 'package:cafeteriat/modules/cafeteria_app/on_boarding/on_boarding_screen.dart';
 import 'package:cafeteriat/shared/components/components.dart';
+import 'package:cafeteriat/shared/network/local/cache_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,10 +18,25 @@ class LoadingScreen extends StatelessWidget {
     return BlocConsumer<CafeteriaLoadingCubit, CafeteriaLoadingStates>(
       listener: (context, state) async {
         if (state is CafeteriaLoadingCafeteriaLayoutState) {
-          await CafeteriaCubit.get(context).getAppData();
-          navigateAndReplace(context, const CafeteriaHomeScreen());
+          Future.delayed(
+            const Duration(milliseconds: 2000),
+            () async {
+              await CafeteriaCubit.get(context).getAppData();
+              bool? onBoardingState = CacheHelper.getData(key: "onBoarding");
+              if (onBoardingState != null) {
+                navigateAndReplace(context, const CafeteriaHomeScreen());
+              } else {
+                navigateAndReplace(context, const OnBoardingScreen());
+              }
+            },
+          );
         } else if (state is CafeteriaLoadingLoginState) {
-          navigateAndReplace(context, CafeteriaLoginScreen());
+          Future.delayed(
+            const Duration(milliseconds: 3000),
+            () async {
+              navigateAndReplace(context, CafeteriaLoginScreen());
+            },
+          );
         }
       },
       builder: (context, state) {
