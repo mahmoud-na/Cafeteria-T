@@ -130,3 +130,9 @@ class CafeteriaRemoveImageErrorState extends CafeteriaStates {
   final String error;
   CafeteriaRemoveImageErrorState(this.error);
 }
+
+
+
+class CafeteriaSearchSuccessState extends CafeteriaStates {}
+class CafeteriaSearchLoadingState extends CafeteriaStates {}
+class CafeteriaSearchErrorState extends CafeteriaStates {}

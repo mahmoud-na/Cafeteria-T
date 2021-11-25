@@ -134,6 +134,7 @@ class CafeteriaLoginScreen extends StatelessWidget {
                                   );
                                 }
                               },
+                              maxLength: 6,
                               obscureText: CafeteriaLoginCubit.get(context)
                                   .isPasswordVisible,
                               prefixIcon: const Icon(
