@@ -29,8 +29,8 @@ class CafeteriaLoginCubit extends Cubit<CafeteriaLoginStates> {
   }
 
   FirebaseStorage storageReference = FirebaseStorage.instance;
-  late UserModel? userModel;
 
+  late UserModel? userModel;
   Future<void> getUserData({
     required String activationCode,
   }) async {

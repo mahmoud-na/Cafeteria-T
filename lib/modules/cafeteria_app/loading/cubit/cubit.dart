@@ -20,6 +20,7 @@ class CafeteriaLoadingCubit extends Cubit<CafeteriaLoadingStates> {
       userName = userModel!.data!.name;
       userProfileImage = CacheHelper.getData(key: "profileImageUrl");
       userCoverImage = CacheHelper.getData(key: "coverImageUrl");
+
       emit(CafeteriaLoadingCafeteriaLayoutState());
     } else {
       emit(CafeteriaLoadingLoginState());

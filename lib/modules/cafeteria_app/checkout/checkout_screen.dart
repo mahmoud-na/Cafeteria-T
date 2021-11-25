@@ -31,6 +31,7 @@ class CheckOutScreen extends StatelessWidget {
           );
         }
         if (state is CafeteriaPostMyOrderSuccessState) {
+          await CafeteriaCubit.get(context).refreshMyOrder();
           Navigator.pop(context);
            defaultShowDialog(
             context: context,
@@ -40,8 +41,6 @@ class CheckOutScreen extends StatelessWidget {
             defaultTextButton: defaultTextButton(
               text: 'طلب اليوم',
               onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
                 navigateTo(
                   context,
                   const MyOrderScreen(),
@@ -58,7 +57,6 @@ class CheckOutScreen extends StatelessWidget {
                await CafeteriaCubit.get(context).getMenuData();
              },
           );
-          await CafeteriaCubit.get(context).refreshMyOrder();
         }
       },
       builder: (context, state) {

@@ -29,7 +29,6 @@ Future<void> main() async {
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
   bool? isDark = CacheHelper.getData(key: "isDark");
-  // bool? onBoardingState = CacheHelper.getData(key: "isDark");
   runApp(
     MyApp(
       isDark: isDark,

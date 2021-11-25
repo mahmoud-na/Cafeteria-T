@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cafeteriat/layout/cafeteria_app/cafeteria_app_layout.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/modules/cafeteria_app/login/cubit/states.dart';
+import 'package:cafeteriat/modules/cafeteria_app/on_boarding/on_boarding_screen.dart';
 import 'package:cafeteriat/shared/components/components.dart';
 import 'package:cafeteriat/shared/components/constants.dart';
 import 'package:cafeteriat/shared/cubit/cubit.dart';
@@ -11,6 +12,7 @@ import 'package:cafeteriat/shared/styles/icon_broken.dart';
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'cubit/cubit.dart';
@@ -49,8 +51,13 @@ class CafeteriaLoginScreen extends StatelessWidget {
                 userId = state.userModel.data!.userId!;
                 userName = state.userModel.data!.name!;
                 await CafeteriaCubit.get(context).getAppData();
-                navigateAndReplace(context, const CafeteriaHomeScreen());
+                navigateAndReplace(context, const OnBoardingScreen());
               });
+            } else if (state.userModel.data!.activationValid == false) {
+              showToast(
+                msg: 'برجاء إدخال كود تفعيل صحيح',
+                state: ToastStates.ERROR,
+              );
             }
           }
         },
@@ -64,6 +71,7 @@ class CafeteriaLoginScreen extends StatelessWidget {
             },
             child: Scaffold(
               appBar: AppBar(
+                elevation: 0.0,
                 actions: [
                   IconButton(
                     onPressed: () {
@@ -135,27 +143,31 @@ class CafeteriaLoginScreen extends StatelessWidget {
                                 if (value!.isEmpty) {
                                   return 'برجاء إدخال كود التفعيل';
                                 }
+                                // if(value.length<6){
+                                //   return 'برجاء إدخال كود تفعيل صحيح مكون من ست أرقام';
+                                // }
                               },
                             ),
                             const SizedBox(
-                              height: 30.0,
+                              height: 15.0,
                             ),
                             ConditionalBuilder(
                               condition: state is! CafeteriaLoginLoadingState,
                               builder: (context) => defaultButton(
-                                  context: context,
-                                  onPressed: () async {
-                                    if (formKey.currentState!.validate()) {
-                                     await CafeteriaLoginCubit.get(context)
-                                          .getUserData(
-                                        activationCode: activationController.text
-                                            .toUpperCase(),
-                                      );
-                                    }
-                                  },
-                                  text: 'تفعيل',
-                                  isUpperCase: true,
-                                  height: 50.0),
+                                context: context,
+                                onPressed: () async {
+                                  if (formKey.currentState!.validate()) {
+                                    await CafeteriaLoginCubit.get(context)
+                                        .getUserData(
+                                      activationCode: activationController.text
+                                          .toUpperCase(),
+                                    );
+                                  }
+                                },
+                                text: 'تفعيل',
+                                isUpperCase: true,
+                                height: 50.0,
+                              ),
                               fallback: (BuildContext context) => const Center(
                                 child: CircularProgressIndicator(),
                               ),
@@ -174,7 +186,6 @@ class CafeteriaLoginScreen extends StatelessWidget {
                                   'إذا كنت لا تمتلك كود تفعيل برجاء الضغط ',
                                   // textDirection: TextDirection.rtl,
                                 ),
-
                               ],
                             )
                           ],
