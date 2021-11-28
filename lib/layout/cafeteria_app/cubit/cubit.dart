@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:bloc/bloc.dart';
@@ -8,25 +9,20 @@ import 'package:cafeteriat/models/cafeteria_app/my_cart_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/my_order_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/product_model.dart';
 import 'package:cafeteriat/models/cafeteria_app/submit_order_response_model.dart';
-import 'package:cafeteriat/models/cafeteria_app/user_model.dart';
 import 'package:cafeteriat/modules/cafeteria_app/dessert/desserts_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/drinks/drinks_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/food/food_screen.dart';
 import 'package:cafeteriat/modules/cafeteria_app/snacks/snacks_screen.dart';
-import 'package:cafeteriat/shared/components/components.dart';
 import 'package:cafeteriat/shared/components/constants.dart';
 import 'package:cafeteriat/shared/network/local/cache_helper.dart';
 import 'package:cafeteriat/shared/network/remote/socket_helper.dart';
 import 'package:cafeteriat/shared/styles/colors.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import '../cafeteria_app_layout.dart';
 
 class CafeteriaCubit extends Cubit<CafeteriaStates> {
   CafeteriaCubit() : super(CafeteriaInitialState());
@@ -35,7 +31,9 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   bool isMyOrder = true;
   int navBarCurrentIndex = 0;
   DateTime? dateAndTimeNow;
-
+  bool menuTimerFire = false;
+  bool currentHistoryTimerFire = false;
+  bool previousHistoryTimerFire = false;
   var platFormType = Platform.operatingSystem;
 
   bool isBottomSheetShown = false;
@@ -107,7 +105,9 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   ProductModel? menuModel;
 
   Future<void> getMenuData() async {
+    menuTimerFire = false;
     emit(CafeteriaMenuLoadingState());
+
     await SocketHelper.getData(query: "EID:$userId,DayMenu<EOF>").then((value) {
       menuModel = ProductModel.fromJson(value);
       if (myCartDataModel!.totalItems != 0) {
@@ -118,13 +118,22 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       }
       emit(CafeteriaMenuSuccessState());
     }).catchError((error) {
+      menuModel = null;
+      Timer(
+        const Duration(seconds: 5),
+        () async {
+          menuTimerFire = true;
+          emit(CafeteriaConnectionTimeoutState());
+        },
+      );
       print(error.toString());
       emit(CafeteriaMenuErrorState(error.toString()));
     });
   }
 
   List<HistoryDataModel> historySorting(
-      List<HistoryDataModel> tmpHistorySorting,) {
+    List<HistoryDataModel> tmpHistorySorting,
+  ) {
     var tmp;
     for (int i = 0; i < tmpHistorySorting.length; i++) {
       for (int j = 0; j < tmpHistorySorting.length - 1; j++) {
@@ -141,7 +150,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
             tmpHistorySorting[j] = tmpHistorySorting[j + 1];
             tmpHistorySorting[j + 1] = tmp;
           } else if (int.parse(
-              tmpHistorySorting[j].dateTime!.substring(12, 14)) ==
+                  tmpHistorySorting[j].dateTime!.substring(12, 14)) ==
               int.parse(tmpHistorySorting[j + 1].dateTime!.substring(12, 14))) {
             if (int.parse(tmpHistorySorting[j].dateTime!.substring(15, 17)) <
                 int.parse(
@@ -150,7 +159,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
               tmpHistorySorting[j] = tmpHistorySorting[j + 1];
               tmpHistorySorting[j + 1] = tmp;
             } else if (int.parse(
-                tmpHistorySorting[j].dateTime!.substring(15, 17)) ==
+                    tmpHistorySorting[j].dateTime!.substring(15, 17)) ==
                 int.parse(
                     tmpHistorySorting[j + 1].dateTime!.substring(15, 17))) {
               if (int.parse(tmpHistorySorting[j].dateTime!.substring(18, 20)) <
@@ -171,6 +180,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   HistoryModel? currentHistoryModel;
 
   Future<void> getCurrentHistoryData() async {
+    currentHistoryTimerFire = false;
     emit(CafeteriaCurrentHistoryLoadingState());
     await SocketHelper.getData(query: "EID:$userId,CurrentHistory<EOF>")
         .then((value) {
@@ -178,6 +188,14 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       currentHistoryModel!.data = historySorting(currentHistoryModel!.data);
       emit(CafeteriaCurrentHistorySuccessState());
     }).catchError((error) {
+      currentHistoryModel = null;
+      Timer(
+        const Duration(seconds: 5),
+        () async {
+          currentHistoryTimerFire = true;
+          emit(CafeteriaConnectionTimeoutState());
+        },
+      );
       print(error.toString());
       emit(CafeteriaCurrentHistoryErrorState(error.toString()));
     });
@@ -186,6 +204,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   HistoryModel? previousHistoryModel;
 
   Future<void> getPreviousHistoryData() async {
+    previousHistoryTimerFire = false;
     emit(CafeteriaPreviousHistoryLoadingState());
     await SocketHelper.getData(
       query: "EID:$userId,PreviousHistory<EOF>",
@@ -194,6 +213,14 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       previousHistoryModel!.data = historySorting(previousHistoryModel!.data);
       emit(CafeteriaPreviousHistorySuccessState());
     }).catchError((error) {
+      previousHistoryModel = null;
+      Timer(
+        const Duration(seconds: 5),
+        () async {
+          previousHistoryTimerFire = true;
+          emit(CafeteriaConnectionTimeoutState());
+        },
+      );
       print(error.toString());
       emit(CafeteriaPreviousHistoryErrorState(error.toString()));
     });
@@ -303,22 +330,73 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       emit(CafeteriaEditMyOrderSuccessState());
     }).catchError((error) {
       print(error.toString());
+      // myEditedOrderModel = MyOrderModel(data: myOrderModel!.data);
+      reloadMyOrderData();
       emit(CafeteriaEditMyOrderErrorState(error.toString()));
     });
+  }
+
+  void reloadMyOrderData() {
+    List<MyOrderListModel> originalOrderList = [];
+    myOrderModel!.data!.orderList.forEach(
+      (element) {
+        originalOrderList.add(
+          MyOrderListModel(
+            image: element.image,
+            name: element.name,
+            counter: element.counter,
+            id: element.id,
+            price: element.price,
+          ),
+        );
+      },
+    );
+    myEditedOrderModel!.data = MyOrderDataModel(
+      dateTime: myOrderModel!.data!.dateTime,
+      orderList: originalOrderList,
+      orderNumber: myOrderModel!.data!.orderNumber,
+      timeAuthorization: myOrderModel!.data!.timeAuthorization,
+      totalPrice: myOrderModel!.data!.totalPrice,
+    );
+  }
+
+  void deleteMyOrder() {
+    myEditedOrderModel!.data!.orderList.forEach(
+      (element) {
+        element.counter = 0;
+      },
+    );
+    myEditedOrderModel!.data!.totalPrice = 0.0;
+    editMyOrderData();
+  }
+
+  void clearCard(
+      {required ProductDataModel card, required BuildContext context}) {
+    myCartDataModel!.totalItems =
+        myCartDataModel!.totalItems - (card.counter - 1);
+    myCartDataModel!.totalPrice =
+        myCartDataModel!.totalPrice - (card.price * (card.counter - 1));
+    card.counter = 0;
+    removeFromCart(card, context);
+    emit(CafeteriaChangeDecrementCounterSuccessState());
   }
 
   Widget shopItemRemoveIcon(var model, context) {
     if (model.counter > 0 &&
         (dateAndTimeNow?.hour ?? errorTempTime) < timeLimitAllowed) {
-      return IconButton(
-        onPressed: () {
-          decrementMenuItemCounter(model, context);
-        },
-        icon: const Icon(
+      return GestureDetector(
+        child: const Icon(
           Icons.remove_circle_outline,
           size: 40.0,
           color: Colors.redAccent,
         ),
+        onLongPress: () {
+          clearCard(
+            card: model,
+            context: context,
+          );
+        },
+        onTap: () => decrementMenuItemCounter(model, context),
       );
     } else {
       return const IconButton(
@@ -396,7 +474,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     if (menuModel.counter == 1) {
       myCartDataModel!.products.add(menuModel);
       getDateAndTimeNow().then(
-            (value) {
+        (value) {
           myCartDataModel!.lastUpdateTime = value.day;
         },
       );
@@ -408,8 +486,10 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     print(savedMyCartString);
   }
 
-  Future<void> removeFromCart(ProductDataModel menuModel,
-      BuildContext context) async {
+  void removeFromCart(
+    ProductDataModel menuModel,
+    BuildContext context,
+  ) {
     if (menuModel.counter == 0) {
       myCartDataModel!.products.remove(menuModel);
       getDateAndTimeNow().then((value) {
@@ -423,7 +503,6 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     myCartDataModel!.totalPrice = myCartDataModel!.totalPrice - menuModel.price;
     String savedMyCartString = json.encode(myCartDataModel!.toMap());
     CacheHelper.saveData(key: 'savedMyCartString', value: savedMyCartString);
-    print(savedMyCartString);
   }
 
   clearMyCart() async {
@@ -463,8 +542,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     return qrData;
   }
 
-  Widget getQrImage() =>
-      QrImage(
+  Widget getQrImage() => QrImage(
         data: getQrCodeDataReady(
           name: userName ?? "",
           userId: userId ?? "",
@@ -509,7 +587,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
         newImage: pickedImagePath,
         isProfilePicture: isProfilePicture,
       ).then(
-            (value) => emit(CafeteriaChangeCoverImageSuccessState()),
+        (value) => emit(CafeteriaChangeCoverImageSuccessState()),
       );
     } else {
       emit(CafeteriaChangeCoverImageErrorState());
@@ -524,27 +602,27 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
           .refFromURL(userProfileImage!)
           .delete()
           .then((value) {
-        CacheHelper.removeData(key: 'profileImageUrl');
-        userProfileImage = '';
-      })
+            CacheHelper.removeData(key: 'profileImageUrl');
+            userProfileImage = '';
+          })
           .then((value) => emit(CafeteriaRemoveImageSuccessState()))
           .catchError((error) {
-        print(error.toString());
-        emit(CafeteriaRemoveImageErrorState(error.toString()));
-      });
+            print(error.toString());
+            emit(CafeteriaRemoveImageErrorState(error.toString()));
+          });
     } else {
       FirebaseStorage.instance
           .refFromURL(userCoverImage!)
           .delete()
           .then((value) {
-        CacheHelper.removeData(key: 'coverImageUrl');
-        userCoverImage = '';
-      })
+            CacheHelper.removeData(key: 'coverImageUrl');
+            userCoverImage = '';
+          })
           .then((value) => emit(CafeteriaRemoveImageSuccessState()))
           .catchError((error) {
-        print(error.toString());
-        emit(CafeteriaRemoveImageErrorState(error.toString()));
-      });
+            print(error.toString());
+            emit(CafeteriaRemoveImageErrorState(error.toString()));
+          });
     }
   }
 
@@ -556,14 +634,14 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
 
     if (isProfilePicture) {
       Reference ref = storageReference.ref().child(
-        'ProfilesPics/$userName:$userId',
-      );
+            'ProfilesPics/$userName:$userId',
+          );
       UploadTask uploadTask = ref.putFile(newImage);
       await uploadTask.then((res) {
         res.ref.getDownloadURL().then((fileURL) {
           userProfileImage = fileURL;
           CacheHelper.saveData(key: 'profileImageUrl', value: fileURL).then(
-                (value) {
+            (value) {
               emit(CafeteriaUploadProfileImageToFirebaseSuccessState());
             },
           );
@@ -574,14 +652,14 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       });
     } else {
       Reference ref = storageReference.ref().child(
-        'drawerBGimages/$userName:$userId',
-      );
+            'drawerBGimages/$userName:$userId',
+          );
       UploadTask uploadTask = ref.putFile(newImage);
       uploadTask.then((res) {
         res.ref.getDownloadURL().then((fileURL) {
           userCoverImage = fileURL;
           CacheHelper.saveData(key: 'coverImageUrl', value: fileURL).then(
-                (value) {
+            (value) {
               emit(CafeteriaUploadCoverImageToFirebaseSuccessState());
             },
           );
@@ -593,26 +671,6 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     }
   }
 
-  void reloadMyOrderData() {
-    List<MyOrderListModel> originalOrderList = [];
-    myOrderModel!.data!.orderList.forEach((element) {
-      originalOrderList.add(MyOrderListModel(
-        image: element.image,
-        name: element.name,
-        counter: element.counter,
-        id: element.id,
-        price: element.price,
-      ));
-    });
-    myEditedOrderModel!.data = MyOrderDataModel(
-      dateTime: myOrderModel!.data!.dateTime,
-      orderList: originalOrderList,
-      orderNumber: myOrderModel!.data!.orderNumber,
-      timeAuthorization: myOrderModel!.data!.timeAuthorization,
-      totalPrice: myOrderModel!.data!.totalPrice,
-    );
-  }
-
   List<ProductDataModel> searchList = [];
 
   void findMatch({
@@ -622,10 +680,8 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     for (int i = 0; i < list.length; i++) {
       if (list[i].name!.contains(text)) {
         searchList.add(list[i]);
-
       }
     }
-
   }
 
   void searchInMenu({
@@ -652,11 +708,10 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     searchList.forEach((element) {
       print(element.name);
     });
-    if(searchList.isNotEmpty){
+    if (searchList.isNotEmpty) {
       emit(CafeteriaSearchSuccessState());
-    }else{
+    } else {
       emit(CafeteriaSearchErrorState());
     }
-
   }
 }

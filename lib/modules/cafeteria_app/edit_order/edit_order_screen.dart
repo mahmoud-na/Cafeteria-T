@@ -44,9 +44,27 @@ class MyOrderScreen extends StatelessWidget {
                   .data!
                   .updateValid ==
               'true') {
-            await CafeteriaCubit.get(context).getMyOrderData();
             Navigator.pop(context);
-            showToast(msg: 'تم تعديل طلبك بنجاح', state: ToastStates.SUCCESS);
+            defaultShowDialog(
+              context: context,
+              title: "تعديل الطلب",
+              content: "تم تعديل طلبك بنجاح",
+              icon: const Icon(
+                Icons.verified,
+                color: Colors.green,
+                size: 40,
+              ),
+              toDoAfterClosing: () async {
+                await CafeteriaCubit.get(context).getMyOrderData();
+                if (CafeteriaCubit.get(context)
+                        .myOrderModel!
+                        .data!
+                        .totalPrice ==
+                    0) {
+                  Navigator.pop(context);
+                }
+              },
+            );
           } else if (CafeteriaCubit.get(context)
                   .editOrderResponseModel!
                   .data!
@@ -96,6 +114,7 @@ class MyOrderScreen extends StatelessWidget {
                       myOrderTotalPrice:
                           cubit.myEditedOrderModel?.data!.totalPrice,
                       context: context,
+                      cubit: cubit,
                     ),
                     const SizedBox(
                       height: 10.0,
@@ -103,6 +122,8 @@ class MyOrderScreen extends StatelessWidget {
                     Expanded(
                       child: shopItemBuilder(
                         menuModel: cubit.myEditedOrderModel?.data!.orderList,
+                        cubit: cubit,
+                        onRefresh: () => cubit.getMyOrderData(),
                       ),
                     ),
                     const SizedBox(
@@ -117,71 +138,74 @@ class MyOrderScreen extends StatelessWidget {
               child: CircularProgressIndicator(),
             ),
           ),
-          floatingActionButton: (cubit.dateAndTimeNow?.hour ?? errorTempTime) <
-                  timeLimitAllowed
-              ? ConditionalBuilder(
-                  condition: state is! CafeteriaMyOrderLoadingState,
-                  builder: (context) => Padding(
-                    padding: const EdgeInsets.all(
-                      10.0,
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 50.0,
-                      child: FloatingActionButton(
-                        elevation: 2.0,
-                        shape: ContinuousRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            20.0,
+          floatingActionButton:
+              (cubit.dateAndTimeNow?.hour ?? errorTempTime) < timeLimitAllowed
+                  ? ConditionalBuilder(
+                      condition: state is! CafeteriaMyOrderLoadingState,
+                      builder: (context) => Padding(
+                        padding: const EdgeInsets.all(
+                          10.0,
+                        ),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 50.0,
+                          child: FloatingActionButton(
+                            heroTag: "editOrder",
+                            elevation: 2.0,
+                            shape: ContinuousRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                20.0,
+                              ),
+                            ),
+                            onPressed: () {
+                              defaultShowDialog(
+                                context: context,
+                                content: "هل أنت متأكد من تعديل طلبك",
+                                title: 'تعديل الطلب',
+                                actions: [
+                                  defaultAlertActionButtons(
+                                    context: context,
+                                    onPressed: () {
+                                      cubit.editMyOrderData();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                      right: 20.0,
+                                    ),
+                                    child: Text(
+                                      "تعديل الطلب",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headline6,
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.monetization_on,
+                                  size: 37.0,
+                                  color: Colors.grey[100],
+                                ),
+                                const SizedBox(
+                                  width: 12.0,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        onPressed: () {
-                          defaultShowDialog(
-                            context: context,
-                            content: "هل أنت متأكد من تعديل طلبك",
-                            title: 'تعديل الطلب',
-                            actions: [
-                              defaultAlertActionButtons(
-                                context: context,
-                                onPressed: () {
-                                  cubit.editMyOrderData();
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  right: 40.0,
-                                ),
-                                child: Text(
-                                  "تعديل الطلب",
-                                  style: Theme.of(context).textTheme.headline6,
-                                ),
-                              ),
-                            ),
-                            Icon(
-                              Icons.monetization_on,
-                              size: 37.0,
-                              color: Colors.grey[100],
-                            ),
-                            const SizedBox(
-                              width: 25.0,
-                            ),
-                          ],
-                        ),
                       ),
-                    ),
-                  ),
-                  fallback: (context) {
-                    return const SizedBox();
-                  },
-                )
-              : null,
+                      fallback: (context) {
+                        return const SizedBox();
+                      },
+                    )
+                  : null,
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerDocked,
         );
@@ -192,37 +216,70 @@ class MyOrderScreen extends StatelessWidget {
   Widget myCartSummery({
     required double? myOrderTotalPrice,
     required BuildContext context,
+    required var cubit,
   }) =>
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Text(
-            "ملخص الطلب",
-            style: Theme.of(context).textTheme.headline6,
-          ),
-          myVDivider(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const SizedBox(
-                width: 30.0,
-              ),
-              Expanded(
-                child: Text(
-                  "المبلغ الإجمالي",
+      Center(
+        child: Stack(
+          alignment: Alignment.topLeft,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Text(
+                  "ملخص الطلب",
                   style: Theme.of(context).textTheme.headline6,
                 ),
+                myVDivider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      width: 30.0,
+                    ),
+                    Expanded(
+                      child: Text(
+                        "المبلغ الإجمالي",
+                        style: Theme.of(context).textTheme.headline6,
+                      ),
+                    ),
+                    Text(
+                      "$myOrderTotalPrice",
+                      style: Theme.of(context).textTheme.headline6,
+                    ),
+                    const SizedBox(
+                      width: 30.0,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Positioned(
+              top: -3.8,
+              child: TextButton(
+                onPressed: () => defaultShowDialog(
+                  context: context,
+                  content: "هل أنت متأكد من حذف الطلب طلبك",
+                  title: 'حذف الطلب',
+                  actions: [
+                    defaultAlertActionButtons(
+                      context: context,
+                      onPressed: () {
+                        cubit.deleteMyOrder();
+                      },
+                    ),
+                  ],
+                ),
+                child: const Text(
+                  "حذف",
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 15.0
+                  ),
+                ),
               ),
-              Text(
-                "$myOrderTotalPrice",
-                style: Theme.of(context).textTheme.headline6,
-              ),
-              const SizedBox(
-                width: 30.0,
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       );
 }

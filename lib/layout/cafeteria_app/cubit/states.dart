@@ -136,3 +136,6 @@ class CafeteriaRemoveImageErrorState extends CafeteriaStates {
 class CafeteriaSearchSuccessState extends CafeteriaStates {}
 class CafeteriaSearchLoadingState extends CafeteriaStates {}
 class CafeteriaSearchErrorState extends CafeteriaStates {}
+
+
+class CafeteriaConnectionTimeoutState extends CafeteriaStates {}

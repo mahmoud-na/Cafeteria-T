@@ -20,6 +20,8 @@ class FoodScreen extends StatelessWidget {
         return RefreshIndicator(
           child: shopItemBuilder(
             menuModel: cubit.menuModel?.data?.food,
+            cubit: cubit,
+            onRefresh: () => cubit.getMenuData(),
           ),
           onRefresh: () => cubit.getMenuData(),
         );

@@ -179,12 +179,16 @@ class CafeteriaLoginScreen extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                defaultTextButton(
-                                  text: 'هنا',
-                                  onPressed: () {},
+                                Container(
+
+                                  child: defaultTextButton(
+
+                                    text: 'اضغط هنا',
+                                    onPressed: () {},
+                                  ),
                                 ),
                                 const Text(
-                                  'إذا كنت لا تمتلك كود تفعيل برجاء الضغط ',
+                                  'إذا كنت لا تمتلك كود تفعيل ',
                                   // textDirection: TextDirection.rtl,
                                 ),
                               ],

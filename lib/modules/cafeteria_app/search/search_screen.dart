@@ -42,7 +42,6 @@ class SearchScreen extends StatelessWidget {
                     textEditingController: searchController,
                     textInputType: TextInputType.text,
                     onChanged: (value) {
-
                       cubit.searchInMenu(
                         text: value,
                       );
@@ -51,7 +50,7 @@ class SearchScreen extends StatelessWidget {
                     prefixIcon: const Icon(Icons.search),
                     validator: (value) {
                       if (value!.isEmpty) {
-                        return 'Enter Text to search';
+                        return 'ادخل ما تريد البحث عنه في مربع البحث';
                       }
                     },
                   ),
@@ -61,7 +60,8 @@ class SearchScreen extends StatelessWidget {
                     padding: EdgeInsets.all(20.0),
                     child: LinearProgressIndicator(),
                   ),
-                if (cubit.searchList.isNotEmpty && searchController.text.isNotEmpty)
+                if (cubit.searchList.isNotEmpty &&
+                    searchController.text.isNotEmpty)
                   Expanded(
                     child: shopItemBuilder(
                       model: cubit.menuModel!,
@@ -75,7 +75,6 @@ class SearchScreen extends StatelessWidget {
                       style: Theme.of(context).textTheme.bodyText1,
                     ),
                   ),
-
               ],
             ),
           ),
@@ -200,8 +199,8 @@ class SearchScreen extends StatelessWidget {
       condition: model != null,
       builder: (context) => ListView.separated(
         physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics()),
-        // shrinkWrap: true,
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
         itemBuilder: (context, index) {
           if ((searchList[index].id! >= 2000) &&
               (searchList[index].id! < 3000)) {
