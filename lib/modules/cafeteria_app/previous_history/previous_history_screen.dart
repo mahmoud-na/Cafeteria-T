@@ -27,9 +27,10 @@ class PreviousHistoryScreen extends StatelessWidget {
             ),
           ),
           body: historyItemBuilder(
-            state: state,
             historyModel:
                 CafeteriaCubit.get(context).previousHistoryModel?.data,
+            onRefresh: () => CafeteriaCubit.get(context).getPreviousHistoryData(),
+            historyTimerFire: CafeteriaCubit.get(context).previousHistoryTimerFire,
           ),
         );
       },

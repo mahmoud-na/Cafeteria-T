@@ -30,7 +30,7 @@ class CafeteriaHomeScreen extends StatelessWidget {
                 cubit.appBarTitles[cubit.navBarCurrentIndex],
               ),
               actions: [
-                if (cubit.myOrderModel != null)
+                if (cubit.myOrderModel != null && cubit.myOrderModel!.data!.orderNumber !=0 )
                   IconButton(
                     onPressed: () {
                       cubit.reloadMyOrderData();

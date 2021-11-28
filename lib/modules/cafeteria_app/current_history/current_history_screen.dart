@@ -29,16 +29,12 @@ class CurrentHistoryScreen extends StatelessWidget {
           ),
           body: RefreshIndicator(
             child: historyItemBuilder(
-              state: state,
               historyModel: CafeteriaCubit.get(context).currentHistoryModel?.data,
-              // onRefresh: () => CafeteriaCubit.get(context).getCurrentHistoryData() ,
+              onRefresh: () => CafeteriaCubit.get(context).getCurrentHistoryData() ,
+              historyTimerFire: CafeteriaCubit.get(context).currentHistoryTimerFire,
             ),
             onRefresh: () => CafeteriaCubit.get(context).getCurrentHistoryData(),
           ),
-
-          // historyItem(
-          //   historyModel: CafeteriaCubit.get(context).currentHistoryModel,
-          // ),
         );
       },
     );

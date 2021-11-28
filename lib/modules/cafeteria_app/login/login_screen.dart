@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:cafeteriat/layout/cafeteria_app/cafeteria_app_layout.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/modules/cafeteria_app/login/cubit/states.dart';
 import 'package:cafeteriat/modules/cafeteria_app/on_boarding/on_boarding_screen.dart';
@@ -8,13 +6,11 @@ import 'package:cafeteriat/shared/components/components.dart';
 import 'package:cafeteriat/shared/components/constants.dart';
 import 'package:cafeteriat/shared/cubit/cubit.dart';
 import 'package:cafeteriat/shared/network/local/cache_helper.dart';
-import 'package:cafeteriat/shared/styles/icon_broken.dart';
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'cubit/cubit.dart';
 
 class CafeteriaLoginScreen extends StatelessWidget {
@@ -179,12 +175,16 @@ class CafeteriaLoginScreen extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                defaultTextButton(
-                                  text: 'هنا',
-                                  onPressed: () {},
+                                Container(
+
+                                  child: defaultTextButton(
+
+                                    text: 'اضغط هنا',
+                                    onPressed: () {},
+                                  ),
                                 ),
                                 const Text(
-                                  'إذا كنت لا تمتلك كود تفعيل برجاء الضغط ',
+                                  'إذا كنت لا تمتلك كود تفعيل ',
                                   // textDirection: TextDirection.rtl,
                                 ),
                               ],

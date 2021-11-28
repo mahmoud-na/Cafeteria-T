@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/states.dart';
 import 'package:cafeteriat/models/cafeteria_app/history_model.dart';
+import 'package:cafeteriat/models/cafeteria_app/product_model.dart';
 import 'package:cafeteriat/modules/cafeteria_app/current_history_order_details/current_history_order_details_screen.dart';
 import 'package:cafeteriat/shared/components/constants.dart';
 import 'package:cafeteriat/shared/styles/colors.dart';
@@ -10,7 +13,9 @@ import 'package:conditional_builder_null_safety/conditional_builder_null_safety.
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -53,7 +58,8 @@ Widget defaultTextButton({
       ),
       style: TextButton.styleFrom(
         padding: EdgeInsets.zero,
-        alignment: Alignment.centerRight,
+        minimumSize: const Size(10.0, 10.0),
+        // alignment: Alignment.centerRight,
       ),
     );
 
@@ -81,7 +87,7 @@ Widget defaultFormField({
   required TextInputType textInputType,
   required String labelText,
   required Widget prefixIcon,
-  var maxLength=null,
+  var maxLength,
   Widget? suffixIcon,
   bool obscureText = false,
   bool enableInteractiveSelection = true,
@@ -98,7 +104,7 @@ Widget defaultFormField({
       onFieldSubmitted: onFieldSubmitted,
       onChanged: onChanged,
       onTap: onTap,
-      maxLength:maxLength,
+      maxLength: maxLength,
       enableInteractiveSelection: enableInteractiveSelection,
       decoration: InputDecoration(
         labelText: labelText,
@@ -213,132 +219,216 @@ Widget defaultIconButton({
 
 Widget shopItem({
   required var menuModel,
+  required var cubit,
+  required BuildContext context,
 }) =>
-    BlocConsumer<CafeteriaCubit, CafeteriaStates>(
-      listener: (context, state) {},
-      builder: (context, state) {
-        var cubit = CafeteriaCubit.get(context);
-        return Column(
-          children: [
-            SizedBox(
-              height: 150.0,
-              child: Card(
-                clipBehavior: Clip.antiAliasWithSaveLayer,
-                elevation: 15.0,
-                margin: const EdgeInsets.all(
-                  8.0,
+    Stack(
+      children: [
+        SizedBox(
+          height: 150.0,
+          child: Card(
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            elevation: 15.0,
+            margin: const EdgeInsets.all(
+              8.0,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                CachedNetworkImage(
+                  key: UniqueKey(),
+                  imageUrl: menuModel.image!,
+                  height: 150.0,
+                  width: 150.0,
+                  imageBuilder: (context, imageProvider) => Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  placeholder: (context, url) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black12,
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    );
+                  },
+                  errorWidget: (context, url, error) {
+                    return Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.black12,
+                      ),
+                      child: const Icon(
+                        Icons.fastfood,
+                        color: Colors.red,
+                        size: 30,
+                      ),
+                    );
+                  },
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    CachedNetworkImage(
-                      key: UniqueKey(),
-                      imageUrl: menuModel.image,
-                      height: 150.0,
-                      width: 150.0,
-                      imageBuilder: (context, imageProvider) => Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: imageProvider,
-                            fit: BoxFit.cover,
-                          ),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "${menuModel.name}",
+                        style: const TextStyle(
+                          fontSize: 20.0,
                         ),
                       ),
-                      placeholder: (context, url) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black12,
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                        );
-                      },
-                      errorWidget: (context, url, error) {
-                        return Container(
-                          decoration: const BoxDecoration(
-                            color: Colors.black12,
-                          ),
-                          child: const Icon(
-                            Icons.fastfood,
-                            color: Colors.red,
-                            size: 30,
-                          ),
-                        );
-                      },
-                    ),
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                      Text(
+                        "${menuModel.price}",
+                        style: const TextStyle(
+                          fontSize: 20.0,
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            "${menuModel.name}",
-                            style: const TextStyle(
-                              fontSize: 20.0,
+                          Expanded(
+                            child: cubit.shopItemAddIcon(menuModel),
+                          ),
+                          Container(
+                            alignment: Alignment.center,
+                            width: 43.0,
+                            child: Text(
+                              "${menuModel.counter}",
+                              style: const TextStyle(
+                                fontSize: 24.0,
+                                color: Colors.grey,
+                              ),
                             ),
                           ),
-                          Text(
-                            "${menuModel.price}",
-                            style: const TextStyle(
-                              fontSize: 20.0,
+                          Expanded(
+                            child: cubit.shopItemRemoveIcon(
+                              menuModel,
+                              context,
                             ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: cubit.shopItemAddIcon(menuModel),
-                              ),
-                              Container(
-                                alignment: Alignment.center,
-                                width: 43.0,
-                                child: Text(
-                                  "${menuModel.counter}",
-                                  style: const TextStyle(
-                                    fontSize: 24.0,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: cubit.shopItemRemoveIcon(
-                                  menuModel,
-                                  context,
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (menuModel.runtimeType == ProductDataModel)
+          if (menuModel.quantity == 0)
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  margin: const EdgeInsets.all(8.0),
+                  width: double.infinity,
+                  height: 134.0,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.8),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(5.0),
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "نأسف لذلك, لقد نفذ الكمية برجاء إختيار منتج اخر",
+                      style: Theme.of(context).textTheme.bodyText1,
+                    ),
+                    const SizedBox(
+                      width: 5.0,
+                    ),
+                    const Icon(
+                      Icons.error,
+                      color: Colors.amberAccent,
                     ),
                   ],
-                ),
-              ),
+                )
+              ],
             ),
-          ],
-        );
-      },
+      ],
     );
 
 Widget shopItemBuilder({
   required var menuModel,
+  required var cubit,
+  required Function() onRefresh,
 }) {
   return ConditionalBuilder(
     condition: menuModel != null,
     builder: (context) => ListView.separated(
-      physics:
-          const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-      // shrinkWrap: true,
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
       itemBuilder: (context, index) => shopItem(
         menuModel: menuModel[index],
+        context: context,
+        cubit: cubit,
       ),
       separatorBuilder: (context, index) => myVDivider(),
       itemCount: menuModel.length,
     ),
-    fallback: (context) => const Center(
-      child: CircularProgressIndicator(),
-    ),
+    fallback: (context) {
+      return cubit.menuTimerFire
+          ? connectionError(onRefresh: onRefresh)
+          : const Center(
+              child: CircularProgressIndicator(),
+            );
+    },
   );
 }
+
+Widget connectionError({
+  required Function() onRefresh,
+}) =>
+    Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(
+            height: 100.0,
+          ),
+          Image.asset(
+            "assets/images/landscape.png",
+            width: 130.0,
+            height: 130.0,
+            color: Colors.grey,
+          ),
+          const SizedBox(
+            height: 30.0,
+          ),
+          const Text(
+            "لا يوجد إتصال بالإنترنت",
+            style: TextStyle(
+              fontSize: 20.0,
+            ),
+          ),
+          const Text(
+            "تعذر الحصول على البيانات برجاء المحاولة مرة أخرى",
+            style: TextStyle(
+              fontWeight: FontWeight.normal,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(
+            height: 10.0,
+          ),
+          IconButton(
+            onPressed: onRefresh,
+            icon: const Icon(
+              Icons.refresh,
+              size: 40.0,
+            ),
+          ),
+        ],
+      ),
+    );
 
 String dateFormatting(HistoryDataModel historyModel) {
   dateFormattingHelper(
@@ -362,10 +452,11 @@ Widget historyItem({
           onTap: () {
             if (historyModel!.payType == 'Prepaid') {
               navigateTo(
-                  context,
-                  CurrentHistoryOrderDetailsScreen(
-                    historyOrderDetailsModel: historyModel,
-                  ));
+                context,
+                CurrentHistoryOrderDetailsScreen(
+                  historyOrderDetailsModel: historyModel,
+                ),
+              );
             }
           },
           child: SizedBox(
@@ -445,7 +536,8 @@ Widget historyItem({
 
 Widget historyItemBuilder({
   required List<HistoryDataModel>? historyModel,
-  required var state,
+  required bool historyTimerFire,
+  required Function() onRefresh,
 }) =>
     ConditionalBuilder(
       condition: historyModel != null,
@@ -462,13 +554,18 @@ Widget historyItemBuilder({
           itemCount: historyModel!.length,
         ),
       ),
-      fallback: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
+      fallback: (context) {
+        return historyTimerFire
+            ? connectionError(onRefresh: onRefresh)
+            : const Center(
+                child: CircularProgressIndicator(),
+              );
+      },
     );
 
-Widget historyOrderDetailsItem(
-        {required HistoryOrdersModel? historyOrderDetailsListModel}) =>
+Widget historyOrderDetailsItem({
+  required HistoryOrdersModel? historyOrderDetailsListModel,
+}) =>
     Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [

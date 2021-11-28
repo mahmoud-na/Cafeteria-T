@@ -17,6 +17,8 @@ class DrinksScreen extends StatelessWidget {
         return RefreshIndicator(
           child: shopItemBuilder(
             menuModel: cubit.menuModel?.data?.beverages,
+            cubit: cubit,
+            onRefresh: () => cubit.getMenuData(),
           ),
           onRefresh:  () => cubit.getMenuData(),
         );

@@ -8,7 +8,6 @@ import 'package:cafeteriat/shared/components/constants.dart';
 import '../end_points.dart';
 
 class Sockets {
-  static var timeOut = false;
   static const delayTime = 6;
 
  static Future<void> sendMessage(Socket socket, String message) async {
@@ -21,7 +20,7 @@ class Sockets {
   static Future connectToServer({
      required String query,
   }) async {
-    timeOut = false;
+
     List<int> toBeDecoded = [];
     late StreamSubscription<Uint8List> subscription;
 
@@ -55,13 +54,11 @@ class Sockets {
       socket.destroy();
       return decodedData;
     } on SocketException {
-      print(
-          "========================================================= SocketException =========================================================}");
-      timeOut = true;
+      print("========================================================= SocketException =========================================================}");
+
     } on TimeoutException {
       print(
           "========================================================= TimeoutException =========================================================}");
-      timeOut = true;
     } catch (e) {
       print(
           "========================================================= Connection error ========================================================= $e}");

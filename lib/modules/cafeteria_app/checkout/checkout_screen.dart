@@ -33,7 +33,7 @@ class CheckOutScreen extends StatelessWidget {
         if (state is CafeteriaPostMyOrderSuccessState) {
           await CafeteriaCubit.get(context).refreshMyOrder();
           Navigator.pop(context);
-           defaultShowDialog(
+          defaultShowDialog(
             context: context,
             title:
                 "تم تأكيد طلب رقم ${CafeteriaCubit.get(context).myOrderModel!.data!.orderNumber}",
@@ -52,10 +52,10 @@ class CheckOutScreen extends StatelessWidget {
               color: Colors.green,
               size: 40,
             ),
-             toDoAfterClosing: () async {
-               await CafeteriaCubit.get(context).clearMyCart();
-               await CafeteriaCubit.get(context).getMenuData();
-             },
+            toDoAfterClosing: () async {
+              await CafeteriaCubit.get(context).clearMyCart();
+              await CafeteriaCubit.get(context).getMenuData();
+            },
           );
         }
       },
@@ -74,25 +74,30 @@ class CheckOutScreen extends StatelessWidget {
               ),
             ),
             actions: [
-              defaultTextButton(
-                text: "خذف السلة",
-                onPressed: () {
-                  defaultShowDialog(
-                    context: context,
-                    content: "هل أنت متأكد من خذف السلة",
-                    title: 'خذف السلة',
-                    actions: [
-                      defaultAlertActionButtons(
-                        context: context,
-                        onPressed: () async {
-                          cubit.clearMyCart();
-                          cubit.getMenuData();
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                  );
-                },
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: 12.0,
+                ),
+                child: defaultTextButton(
+                  text: "خذف السلة",
+                  onPressed: () {
+                    defaultShowDialog(
+                      context: context,
+                      content: "هل أنت متأكد من خذف السلة",
+                      title: 'خذف السلة',
+                      actions: [
+                        defaultAlertActionButtons(
+                          context: context,
+                          onPressed: () async {
+                            cubit.clearMyCart();
+                            cubit.getMenuData();
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -108,6 +113,8 @@ class CheckOutScreen extends StatelessWidget {
                 Expanded(
                   child: shopItemBuilder(
                     menuModel: cubit.myCartDataModel!.products,
+                    cubit: cubit,
+                    onRefresh: () => cubit.getMenuData(),
                   ),
                 ),
                 const SizedBox(
