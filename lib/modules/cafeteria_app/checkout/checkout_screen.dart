@@ -14,6 +14,7 @@ class CheckOutScreen extends StatelessWidget {
     return BlocConsumer<CafeteriaCubit, CafeteriaStates>(
       listener: (context, state) async {
         if (state is ClearMyCartSuccessState) {
+          await CafeteriaCubit.get(context).getMenuData();
           Navigator.pop(context);
         }
         if (state is CafeteriaPostMyOrderLoadingState) {
@@ -31,31 +32,69 @@ class CheckOutScreen extends StatelessWidget {
           );
         }
         if (state is CafeteriaPostMyOrderSuccessState) {
-          await CafeteriaCubit.get(context).refreshMyOrder();
+          if (CafeteriaCubit.get(context)
+                  .submitOrderResponseModel!
+                  .data!
+                  .orderValid ==
+              'true') {
+            await CafeteriaCubit.get(context).refreshMyOrder();
+            Navigator.pop(context);
+            defaultShowDialog(
+              context: context,
+              title:
+                  "تم تأكيد طلب رقم ${CafeteriaCubit.get(context).myOrderModel!.data!.orderNumber}",
+              content: "يمكنك مراجعة الطلب من صفحة ",
+              defaultTextButton: defaultTextButton(
+                text: 'طلب اليوم',
+                onPressed: () {
+                  navigateTo(
+                    context,
+                    const MyOrderScreen(),
+                  );
+                },
+              ),
+              icon: const Icon(
+                Icons.verified,
+                color: Colors.green,
+                size: 40,
+              ),
+              toDoAfterClosing: () async {
+                await CafeteriaCubit.get(context).clearMyCart();
+              },
+            );
+
+          } else if (CafeteriaCubit.get(context)
+                  .submitOrderResponseModel!
+                  .data!
+                  .orderValid ==
+              'false') {
+            Navigator.pop(context);
+
+            defaultShowDialog(
+              context: context,
+              title: "حدث خطأ !",
+              content:
+                  "${CafeteriaCubit.get(context).submitOrderResponseModel!.data!.errMsg}",
+              icon: const Icon(
+                Icons.error,
+                color: Colors.red,
+                size: 40,
+              ),
+            );
+          }
+        }
+
+        if (state is CafeteriaPostMyOrderErrorState) {
           Navigator.pop(context);
           defaultShowDialog(
             context: context,
-            title:
-                "تم تأكيد طلب رقم ${CafeteriaCubit.get(context).myOrderModel!.data!.orderNumber}",
-            content: "يمكنك مراجعة الطلب من صفحة ",
-            defaultTextButton: defaultTextButton(
-              text: 'طلب اليوم',
-              onPressed: () {
-                navigateTo(
-                  context,
-                  const MyOrderScreen(),
-                );
-              },
-            ),
+            title: "حدث خطأ !",
+            content: "لم يتم قبول الطلب برجاء المحاولة مرة اخرى",
             icon: const Icon(
-              Icons.verified,
-              color: Colors.green,
+              Icons.error,
+              color: Colors.red,
               size: 40,
             ),
-            toDoAfterClosing: () async {
-              await CafeteriaCubit.get(context).clearMyCart();
-              await CafeteriaCubit.get(context).getMenuData();
-            },
           );
         }
       },
@@ -90,7 +129,6 @@ class CheckOutScreen extends StatelessWidget {
                           context: context,
                           onPressed: () async {
                             cubit.clearMyCart();
-                            cubit.getMenuData();
                             Navigator.pop(context);
                           },
                         ),

@@ -24,6 +24,9 @@ class CafeteriaLoginScreen extends StatelessWidget {
       create: (context) => CafeteriaLoginCubit(),
       child: BlocConsumer<CafeteriaLoginCubit, CafeteriaLoginStates>(
         listener: (context, state) {
+          // if(state is CafeteriaUserDataLoadingState ){
+          //   CafeteriaLoginCubit.get(context).
+          // }
           if (state is CafeteriaUserDataSuccessState) {
             if (state.userModel.data!.activationValid == true) {
               print('=======================================');
@@ -31,10 +34,7 @@ class CafeteriaLoginScreen extends StatelessWidget {
               print('=======================================');
               print(state.userModel.data!.userId);
               print('=======================================');
-              showToast(
-                msg: 'تم تسجيل الدخول بنجاح',
-                state: ToastStates.SUCCESS,
-              );
+
               CacheHelper.saveData(
                 key: 'userData',
                 value: json.encode(
@@ -46,10 +46,17 @@ class CafeteriaLoginScreen extends StatelessWidget {
               ).then((value) async {
                 userId = state.userModel.data!.userId!;
                 userName = state.userModel.data!.name!;
+
                 await CafeteriaCubit.get(context).getAppData();
+                CafeteriaLoginCubit.get(context).isLoading = false;
+                showToast(
+                  msg: 'تم تسجيل الدخول بنجاح',
+                  state: ToastStates.SUCCESS,
+                );
                 navigateAndReplace(context, const OnBoardingScreen());
               });
             } else if (state.userModel.data!.activationValid == false) {
+              CafeteriaLoginCubit.get(context).isLoading = false;
               showToast(
                 msg: 'برجاء إدخال كود تفعيل صحيح',
                 state: ToastStates.ERROR,
@@ -149,8 +156,11 @@ class CafeteriaLoginScreen extends StatelessWidget {
                               height: 15.0,
                             ),
                             ConditionalBuilder(
-                              condition: state is! CafeteriaLoginLoadingState,
-                              builder: (context) => defaultButton(
+                              condition:
+                                  CafeteriaLoginCubit.get(context).isLoading,
+                              builder: (context) => const Center(
+                                  child: CircularProgressIndicator()),
+                              fallback: (BuildContext context) => defaultButton(
                                 context: context,
                                 onPressed: () async {
                                   if (formKey.currentState!.validate()) {
@@ -165,9 +175,6 @@ class CafeteriaLoginScreen extends StatelessWidget {
                                 isUpperCase: true,
                                 height: 50.0,
                               ),
-                              fallback: (BuildContext context) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
                             ),
                             const SizedBox(
                               height: 15.0,
@@ -176,16 +183,13 @@ class CafeteriaLoginScreen extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Container(
-
                                   child: defaultTextButton(
-
                                     text: 'اضغط هنا',
                                     onPressed: () {},
                                   ),
                                 ),
                                 const Text(
                                   'إذا كنت لا تمتلك كود تفعيل ',
-                                  // textDirection: TextDirection.rtl,
                                 ),
                               ],
                             )

@@ -36,6 +36,7 @@ class MyOrderScreen extends StatelessWidget {
               color: Colors.red,
               size: 40,
             ),
+            toDoAfterClosing: () => CafeteriaCubit.get(context).reloadMyOrderData(),
           );
         }
         if (state is CafeteriaEditMyOrderSuccessState) {
@@ -71,10 +72,17 @@ class MyOrderScreen extends StatelessWidget {
                   .updateValid ==
               'false') {
             Navigator.pop(context);
-            showToast(
-                msg:
-                    '${CafeteriaCubit.get(context).editOrderResponseModel!.data!.errorMessage}',
-                state: ToastStates.ERROR);
+            defaultShowDialog(
+              context: context,
+              content: '${CafeteriaCubit.get(context).editOrderResponseModel!.data!.errorMessage}',
+              title: 'تعديل الطلب',
+              icon: const Icon(
+                Icons.error,
+                color: Colors.red,
+                size: 40,
+              ),
+              toDoAfterClosing: () => CafeteriaCubit.get(context).reloadMyOrderData(),
+            );
           }
         }
       },
@@ -255,11 +263,12 @@ class MyOrderScreen extends StatelessWidget {
               ],
             ),
             Positioned(
-              top: -3.8,
+              top: -10,
+              left: 20,
               child: TextButton(
                 onPressed: () => defaultShowDialog(
                   context: context,
-                  content: "هل أنت متأكد من حذف الطلب طلبك",
+                  content: "هل أنت متأكد من حذف الطلب",
                   title: 'حذف الطلب',
                   actions: [
                     defaultAlertActionButtons(

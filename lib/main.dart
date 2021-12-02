@@ -9,6 +9,7 @@ import 'package:cafeteriat/shared/cubit/states.dart';
 import 'package:cafeteriat/shared/network/local/cache_helper.dart';
 import 'package:cafeteriat/shared/styles/themes.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'layout/cafeteria_app/cafeteria_app_layout.dart';
@@ -26,9 +27,13 @@ Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  FirebaseMessaging.onMessage.listen((event) {print("success");}).onError((error){
+    print("error");
+  });
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
   bool? isDark = CacheHelper.getData(key: "isDark");
+
   runApp(
     MyApp(
       isDark: isDark,

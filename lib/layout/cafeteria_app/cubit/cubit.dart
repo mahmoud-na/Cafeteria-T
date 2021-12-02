@@ -107,7 +107,6 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   Future<void> getMenuData() async {
     menuTimerFire = false;
     emit(CafeteriaMenuLoadingState());
-
     await SocketHelper.getData(query: "EID:$userId,DayMenu<EOF>").then((value) {
       menuModel = ProductModel.fromJson(value);
       if (myCartDataModel!.totalItems != 0) {
@@ -254,8 +253,6 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     });
   }
 
-  SubmitOrderResponseModel? submitOrderResponseModel;
-
   String sendOrder({required List myCartList}) {
     String order = '';
     for (int index = 0; index < myCartList.length; index++) {
@@ -297,6 +294,8 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     await getMyOrderData();
   }
 
+  SubmitOrderResponseModel? submitOrderResponseModel;
+
   void postMyOrderData(BuildContext context) {
     emit(CafeteriaPostMyOrderLoadingState());
     SocketHelper.postData(
@@ -305,12 +304,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       )},EName:$userName,TCost:${myCartDataModel!.totalPrice}<EOF>",
     ).then((value) async {
       submitOrderResponseModel = SubmitOrderResponseModel.fromJson(value);
-      if (submitOrderResponseModel!.data!.orderValid == 'true') {
-        emit(CafeteriaPostMyOrderSuccessState());
-      } else {
-        emit(CafeteriaPostMyOrderErrorState(
-            submitOrderResponseModel!.data!.errMsg!));
-      }
+      emit(CafeteriaPostMyOrderSuccessState());
     }).catchError((error) {
       print(error.toString());
       emit(CafeteriaPostMyOrderErrorState(error.toString()));
@@ -330,8 +324,6 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       emit(CafeteriaEditMyOrderSuccessState());
     }).catchError((error) {
       print(error.toString());
-      // myEditedOrderModel = MyOrderModel(data: myOrderModel!.data);
-      reloadMyOrderData();
       emit(CafeteriaEditMyOrderErrorState(error.toString()));
     });
   }
@@ -370,8 +362,10 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     editMyOrderData();
   }
 
-  void clearCard(
-      {required ProductDataModel card, required BuildContext context}) {
+  void clearCard({
+    required ProductDataModel card,
+    required BuildContext context,
+  }) {
     myCartDataModel!.totalItems =
         myCartDataModel!.totalItems - (card.counter - 1);
     myCartDataModel!.totalPrice =
@@ -391,10 +385,12 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
           color: Colors.redAccent,
         ),
         onLongPress: () {
-          clearCard(
-            card: model,
-            context: context,
-          );
+          if (model.runtimeType == ProductDataModel) {
+            clearCard(
+              card: model,
+              context: context,
+            );
+          }
         },
         onTap: () => decrementMenuItemCounter(model, context),
       );
@@ -487,7 +483,7 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   }
 
   void removeFromCart(
-    ProductDataModel menuModel,
+    var menuModel,
     BuildContext context,
   ) {
     if (menuModel.counter == 0) {
@@ -513,16 +509,21 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   }
 
   Future<void> getAppData() async {
+    await getDateAndTimeNow()
+        .then((value) => dateAndTimeNow = value)
+        .timeout(const Duration(seconds: 2))
+        .catchError((error) {});
+
     await getMyOrderData();
     if (CacheHelper.getData(key: "savedMyCartString") != null) {
       await getMyCartData();
-      if (myCartDataModel!.lastUpdateTime != dateAndTimeNow?.day) {
+      if (myCartDataModel!.lastUpdateTime != dateAndTimeNow?.day &&
+          myCartDataModel!.lastUpdateTime != 0) {
         await clearMyCart();
       }
     } else {
       myCartDataModel = MyCartModel.clear();
     }
-
     await getMenuData();
     await getPreviousHistoryData();
     await getCurrentHistoryData();
