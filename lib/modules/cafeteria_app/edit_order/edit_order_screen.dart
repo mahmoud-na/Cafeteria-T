@@ -8,6 +8,22 @@ import 'package:conditional_builder_null_safety/conditional_builder_null_safety.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+bool isMyOrderEdited(context) {
+  for (int i = 0;
+      i < CafeteriaCubit.get(context).myOrderModel!.data!.orderList.length;
+      i++) {
+    if (CafeteriaCubit.get(context).myOrderModel!.data!.orderList[i].counter !=
+        CafeteriaCubit.get(context)
+            .myEditedOrderModel!
+            .data!
+            .orderList[i]
+            .counter) {
+      return true;
+    }
+  }
+  return false;
+}
+
 class MyOrderScreen extends StatelessWidget {
   const MyOrderScreen({Key? key}) : super(key: key);
 
@@ -36,7 +52,8 @@ class MyOrderScreen extends StatelessWidget {
               color: Colors.red,
               size: 40,
             ),
-            toDoAfterClosing: () => CafeteriaCubit.get(context).reloadMyOrderData(),
+            toDoAfterClosing: () =>
+                CafeteriaCubit.get(context).reloadMyOrderData(),
           );
         }
         if (state is CafeteriaEditMyOrderSuccessState) {
@@ -74,14 +91,16 @@ class MyOrderScreen extends StatelessWidget {
             Navigator.pop(context);
             defaultShowDialog(
               context: context,
-              content: '${CafeteriaCubit.get(context).editOrderResponseModel!.data!.errorMessage}',
+              content:
+                  '${CafeteriaCubit.get(context).editOrderResponseModel!.data!.errorMessage}',
               title: 'تعديل الطلب',
               icon: const Icon(
                 Icons.error,
                 color: Colors.red,
                 size: 40,
               ),
-              toDoAfterClosing: () => CafeteriaCubit.get(context).reloadMyOrderData(),
+              toDoAfterClosing: () =>
+                  CafeteriaCubit.get(context).reloadMyOrderData(),
             );
           }
         }
@@ -134,9 +153,12 @@ class MyOrderScreen extends StatelessWidget {
                         onRefresh: () => cubit.getMyOrderData(),
                       ),
                     ),
-                    const SizedBox(
-                      height: 40.0,
-                    ),
+                    if (((cubit.dateAndTimeNow?.hour ?? errorTempTime) <
+                            timeLimitAllowed) &&
+                        (isMyOrderEdited(context)))
+                      const SizedBox(
+                        height: 40.0,
+                      ),
                   ],
                 ),
                 onRefresh: () => cubit.getMyOrderData(),
@@ -146,74 +168,73 @@ class MyOrderScreen extends StatelessWidget {
               child: CircularProgressIndicator(),
             ),
           ),
-          floatingActionButton:
-              (cubit.dateAndTimeNow?.hour ?? errorTempTime) < timeLimitAllowed
-                  ? ConditionalBuilder(
-                      condition: state is! CafeteriaMyOrderLoadingState,
-                      builder: (context) => Padding(
-                        padding: const EdgeInsets.all(
-                          10.0,
-                        ),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: 50.0,
-                          child: FloatingActionButton(
-                            heroTag: "editOrder",
-                            elevation: 2.0,
-                            shape: ContinuousRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                20.0,
-                              ),
-                            ),
-                            onPressed: () {
-                              defaultShowDialog(
-                                context: context,
-                                content: "هل أنت متأكد من تعديل طلبك",
-                                title: 'تعديل الطلب',
-                                actions: [
-                                  defaultAlertActionButtons(
-                                    context: context,
-                                    onPressed: () {
-                                      cubit.editMyOrderData();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                      right: 20.0,
-                                    ),
-                                    child: Text(
-                                      "تعديل الطلب",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headline6,
-                                    ),
-                                  ),
-                                ),
-                                Icon(
-                                  Icons.monetization_on,
-                                  size: 37.0,
-                                  color: Colors.grey[100],
-                                ),
-                                const SizedBox(
-                                  width: 12.0,
-                                ),
-                              ],
-                            ),
+          floatingActionButton: ((cubit.dateAndTimeNow?.hour ?? errorTempTime) <
+                      timeLimitAllowed) &&
+                  (isMyOrderEdited(context))
+              ? ConditionalBuilder(
+                  condition: state is! CafeteriaMyOrderLoadingState,
+                  builder: (context) => Padding(
+                    padding: const EdgeInsets.all(
+                      10.0,
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50.0,
+                      child: FloatingActionButton(
+                        heroTag: "editOrder",
+                        elevation: 2.0,
+                        shape: ContinuousRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            20.0,
                           ),
                         ),
+                        onPressed: () {
+                          defaultShowDialog(
+                            context: context,
+                            content: "هل أنت متأكد من تعديل طلبك",
+                            title: 'تعديل الطلب',
+                            actions: [
+                              defaultAlertActionButtons(
+                                context: context,
+                                onPressed: () {
+                                  cubit.editMyOrderData();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  right: 20.0,
+                                ),
+                                child: Text(
+                                  "تعديل الطلب",
+                                  style: Theme.of(context).textTheme.headline6,
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              Icons.monetization_on,
+                              size: 37.0,
+                              color: Colors.grey[100],
+                            ),
+                            const SizedBox(
+                              width: 12.0,
+                            ),
+                          ],
+                        ),
                       ),
-                      fallback: (context) {
-                        return const SizedBox();
-                      },
-                    )
-                  : null,
+                    ),
+                  ),
+                  fallback: (context) {
+                    return const SizedBox();
+                  },
+                )
+              : null,
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerDocked,
         );
@@ -281,10 +302,7 @@ class MyOrderScreen extends StatelessWidget {
                 ),
                 child: const Text(
                   "حذف",
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 15.0
-                  ),
+                  style: TextStyle(color: Colors.red, fontSize: 15.0),
                 ),
               ),
             ),

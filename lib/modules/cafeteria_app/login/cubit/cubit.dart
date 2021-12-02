@@ -42,10 +42,7 @@ class CafeteriaLoginCubit extends Cubit<CafeteriaLoginStates> {
     await SocketHelper.getData(query: "EID:0,ACTCODE:$activationCode<EOF>")
         .then((value) async {
       userModel = UserModel.fromJson(value);
-      await getUserImages(
-        userId: userModel!.data!.userId!,
-        userName: userModel!.data!.name!,
-      );
+
 
       emit(CafeteriaUserDataSuccessState(userModel: userModel!));
     }).catchError((error) {
