@@ -110,8 +110,7 @@ class CafeteriaHomeScreen extends StatelessWidget {
                 currentIndex: cubit.navBarCurrentIndex,
               ),
             ),
-            floatingActionButton: (cubit.myCartDataModel != null &&
-                    cubit.myCartDataModel!.totalItems != 0)
+            floatingActionButton: (cubit.myCartDataModel != null && cubit.myCartDataModel!.totalItems != 0)
                 ? SizedBox(
                     height: 60.0,
                     width: 60.0,

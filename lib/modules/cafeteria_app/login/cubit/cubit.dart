@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/models/cafeteria_app/user_model.dart';
 import 'package:cafeteriat/modules/cafeteria_app/login/cubit/states.dart';
 import 'package:cafeteriat/shared/components/constants.dart';
@@ -13,6 +14,7 @@ class CafeteriaLoginCubit extends Cubit<CafeteriaLoginStates> {
 
   static CafeteriaLoginCubit get(context) => BlocProvider.of(context);
 
+  bool isLoading =false;
   Map userModelToMap({
     required String userID,
     required String userName,
@@ -31,10 +33,12 @@ class CafeteriaLoginCubit extends Cubit<CafeteriaLoginStates> {
   FirebaseStorage storageReference = FirebaseStorage.instance;
 
   late UserModel? userModel;
+
   Future<void> getUserData({
     required String activationCode,
   }) async {
     emit(CafeteriaUserDataLoadingState());
+    isLoading =true;
     await SocketHelper.getData(query: "EID:0,ACTCODE:$activationCode<EOF>")
         .then((value) async {
       userModel = UserModel.fromJson(value);
@@ -42,6 +46,7 @@ class CafeteriaLoginCubit extends Cubit<CafeteriaLoginStates> {
         userId: userModel!.data!.userId!,
         userName: userModel!.data!.name!,
       );
+
       emit(CafeteriaUserDataSuccessState(userModel: userModel!));
     }).catchError((error) {
       print(error.toString());
@@ -49,9 +54,10 @@ class CafeteriaLoginCubit extends Cubit<CafeteriaLoginStates> {
     });
   }
 
-  Future<void> getUserImages(
-      {required String userName, required String userId}) async {
-
+  Future<void> getUserImages({
+    required String userName,
+    required String userId,
+  }) async {
     try {
       storageReference
           .ref()

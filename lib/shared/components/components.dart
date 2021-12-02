@@ -274,15 +274,19 @@ Widget shopItem({
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      const SizedBox(height: 10.0,),
                       Text(
                         "${menuModel.name}",
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
+                          height: 1.0,
                           fontSize: 20.0,
                         ),
                       ),
                       Text(
                         "${menuModel.price}",
                         style: const TextStyle(
+                          height: 1.5,
                           fontSize: 20.0,
                         ),
                       ),
@@ -337,17 +341,18 @@ Widget shopItem({
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      "نأسف لذلك, لقد نفذ الكمية برجاء إختيار منتج اخر",
-                      style: Theme.of(context).textTheme.bodyText1,
-                    ),
-                    const SizedBox(
-                      width: 5.0,
-                    ),
                     const Icon(
                       Icons.error,
                       color: Colors.amberAccent,
                     ),
+                    const SizedBox(
+                      width: 5.0,
+                    ),
+                    Text(
+                      "عذراً، لقد نفذت الكمية برجاء إختيار منتج اخر",
+                      style: Theme.of(context).textTheme.bodyText1,
+                    ),
+
                   ],
                 )
               ],
@@ -693,7 +698,7 @@ Future<void> defaultShowDialog({
                     content,
                     textDirection: TextDirection.rtl,
                     softWrap: true,
-                    textAlign: TextAlign.justify,
+                    // textAlign: TextAlign.justify,
                   ),
                 ),
               ],
