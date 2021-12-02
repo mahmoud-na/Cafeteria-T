@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/shared/bloc_observer.dart';
+import 'package:cafeteriat/shared/components/components.dart';
 import 'package:cafeteriat/shared/components/constants.dart';
 import 'package:cafeteriat/shared/cubit/cubit.dart';
 import 'package:cafeteriat/shared/cubit/states.dart';
@@ -18,18 +19,20 @@ import 'modules/cafeteria_app/loading/cubit/cubit.dart';
 import 'modules/cafeteria_app/loading/loading_screen.dart';
 import 'modules/cafeteria_app/login/login_screen.dart';
 
-Future<void> main() async {
-  /*
-    *   WidgetsFlutterBinding.ensureInitialized();
-    *   When we use async in main we have to call this function to
-    *   ensure App initializations will occurs before app starting
-  */
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {}
 
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  FirebaseMessaging.onMessage.listen((event) {print("success");}).onError((error){
-    print("error");
+  await FirebaseMessaging.instance.getToken();
+  FirebaseMessaging.onMessage.listen((event) {
+    showToast(
+      msg: "تبقى على أخر ميعاد للطلبات ربع ساعة فقط",
+      state: ToastStates.SUCCESS,
+    );
   });
+  FirebaseMessaging.onMessageOpenedApp.listen((event) {});
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
   bool? isDark = CacheHelper.getData(key: "isDark");
@@ -80,7 +83,7 @@ class MyApp extends StatelessWidget {
             themeMode: AppCubit.get(context).isDarkMode
                 ? ThemeMode.dark
                 : ThemeMode.light,
-            home:   Directionality(
+            home: Directionality(
               child: startingScreen!,
               textDirection: TextDirection.rtl,
               // textDirection: TextDirection.ltr,

@@ -46,7 +46,10 @@ class CafeteriaLoginScreen extends StatelessWidget {
               ).then((value) async {
                 userId = state.userModel.data!.userId!;
                 userName = state.userModel.data!.name!;
-
+                await CafeteriaLoginCubit.get(context).getUserImages(
+                  userId: state.userModel.data!.userId!,
+                  userName: state.userModel.data!.name!,
+                );
                 await CafeteriaCubit.get(context).getAppData();
                 CafeteriaLoginCubit.get(context).isLoading = false;
                 showToast(
