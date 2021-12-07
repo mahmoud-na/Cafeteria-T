@@ -273,7 +273,9 @@ Widget shopItem({
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const SizedBox(height: 10.0,),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
                       Text(
                         "${menuModel.name}",
                         textAlign: TextAlign.center,
@@ -351,7 +353,6 @@ Widget shopItem({
                       "عذراً، لقد نفذت الكمية برجاء إختيار منتج اخر",
                       style: Theme.of(context).textTheme.bodyText1,
                     ),
-
                   ],
                 )
               ],
@@ -642,7 +643,11 @@ Widget defaultQrIconButton({
       ),
     );
 
-Future showQrFunction({required BuildContext context, req}) => showDialog(
+Future showQrFunction({
+  required BuildContext context,
+  req,
+}) =>
+    showDialog(
       context: context,
       builder: (context) => Dialog(
         insetPadding: const EdgeInsets.all(12.0),
@@ -697,6 +702,7 @@ Future<void> defaultShowDialog({
                     content,
                     textDirection: TextDirection.rtl,
                     softWrap: true,
+                    textAlign: TextAlign.justify,
                     // textAlign: TextAlign.justify,
                   ),
                 ),

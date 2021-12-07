@@ -74,15 +74,9 @@ class profileScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              placeholder: (context, url) => Container(
-                                height: 131.0,
-                                width: 131.0,
+                              placeholder: (context, url) =>  Container(alignment: Alignment.topCenter,
                                 child: const CircularProgressIndicator(
                                   strokeWidth: 4,
-                                ),
-                                decoration: const BoxDecoration(
-                                  color: Colors.black12,
-                                  shape: BoxShape.circle,
                                 ),
                               ),
                               errorWidget: (context, url, error) => Container(

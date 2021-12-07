@@ -26,7 +26,7 @@ class LoadingScreen extends StatelessWidget {
               if (onBoardingState != null) {
                 navigateAndReplace(context, const CafeteriaHomeScreen());
               } else {
-                navigateAndReplace(context, const OnBoardingScreen());
+                navigateAndReplace(context,  OnBoardingScreen());
               }
             },
           );
