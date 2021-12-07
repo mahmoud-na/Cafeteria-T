@@ -512,8 +512,8 @@ Widget historyItem({
                           width: 10.0,
                         ),
                         historyModel.payType == "Prepaid"
-                            ? const Text("دفع مسبق")
-                            : const Text("دفع عند الإستلام"),
+                            ?  const Text(" دفع مسبق")
+                            :  Text("دفع عند الإستلام  (${historyModel.ordersList[0].name})"),
                         if (historyModel.payType == "Prepaid")
                           Expanded(
                             child: Row(
@@ -676,6 +676,7 @@ Future<void> defaultShowDialog({
   bool closeable = true,
   Widget? icon,
   List<Widget>? actions,
+  Widget? listTile,
   Widget? defaultTextButton,
 }) async =>
     WidgetsBinding.instance!.addPostFrameCallback(
@@ -690,23 +691,31 @@ Future<void> defaultShowDialog({
             titlePadding: const EdgeInsets.only(
               top: 15.0,
             ),
-            content: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                defaultTextButton ?? const SizedBox(),
-                Flexible(
-                  fit: FlexFit.loose,
-                  flex: 2,
-                  child: Text(
-                    content,
-                    textDirection: TextDirection.rtl,
-                    softWrap: true,
-                    textAlign: TextAlign.justify,
-                    // textAlign: TextAlign.justify,
+            content: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      defaultTextButton ?? const SizedBox(),
+                      Flexible(
+                        fit: FlexFit.loose,
+                        flex: 2,
+                        child: Text(
+                          content,
+                          textDirection: TextDirection.rtl,
+                          softWrap: true,
+                          textAlign: TextAlign.justify,
+                          // textAlign: TextAlign.justify,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  listTile??SizedBox(),
+                ],
+              ),
             ),
             title: Column(
               children: [
