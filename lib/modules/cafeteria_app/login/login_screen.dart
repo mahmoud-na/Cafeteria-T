@@ -56,7 +56,7 @@ class CafeteriaLoginScreen extends StatelessWidget {
                   msg: 'تم تسجيل الدخول بنجاح',
                   state: ToastStates.SUCCESS,
                 );
-                navigateAndReplace(context, const OnBoardingScreen());
+                navigateAndReplace(context, OnBoardingScreen());
               });
             } else if (state.userModel.data!.activationValid == false) {
               CafeteriaLoginCubit.get(context).isLoading = false;
@@ -78,16 +78,6 @@ class CafeteriaLoginScreen extends StatelessWidget {
             child: Scaffold(
               appBar: AppBar(
                 elevation: 0.0,
-                actions: [
-                  IconButton(
-                    onPressed: () {
-                      AppCubit.get(context).changeAppThemeMode();
-                    },
-                    icon: const Icon(
-                      Icons.dark_mode,
-                    ),
-                  ),
-                ],
               ),
               body: Directionality(
                 textDirection: TextDirection.ltr,
@@ -162,7 +152,8 @@ class CafeteriaLoginScreen extends StatelessWidget {
                               condition:
                                   CafeteriaLoginCubit.get(context).isLoading,
                               builder: (context) => const Center(
-                                  child: CircularProgressIndicator()),
+                                child: CircularProgressIndicator(),
+                              ),
                               fallback: (BuildContext context) => defaultButton(
                                 context: context,
                                 onPressed: () async {
@@ -188,7 +179,22 @@ class CafeteriaLoginScreen extends StatelessWidget {
                                 Container(
                                   child: defaultTextButton(
                                     text: 'اضغط هنا',
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      defaultShowDialog(
+                                        content:
+                                            'هذا التطبيق خاص بالعاملين بالشركة العربية العالمية للبصريات إذا كنت تعمل بالشركة ولا تملك كود التفعيل برجاء التوجه إلى قسم شئون العاملين لإستلام كودك',
+                                        title:
+                                            'الشركة العربية العالمية للبصريات',
+                                        context: context,
+                                        icon: const Image(
+                                          image: AssetImage(
+                                            'assets/images/Aio_Logo_original.png',
+                                          ),
+                                          height: 100.0,
+                                          width:100.0,
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                                 const Text(
