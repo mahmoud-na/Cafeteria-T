@@ -99,21 +99,25 @@ class MyDrawer extends StatelessWidget {
                             padding: const EdgeInsets.all(12.0),
                             child: Directionality(
                               textDirection: TextDirection.rtl,
-                              child: ExpansionTile(
-                                tilePadding: EdgeInsets.zero,
-                                title: const Text(
-                                  "نبذة عن التطبيق",
-                                ),
-                                children: <Widget>[
-                                  Text(
-                                    "هذا التطبيق ببساطة يأخذ الطلبات المقدمة  من خلاله ويرسلها إلى مطبخ الكافتيريا ليتم إعداد وتحضير الوجبات وتقديمها للعاملين في اوقات واماكن الراحة الرسمية من خلال عملية مميكنة بالكامل حيث انك لن تكون مضطر إلى خوض تجربة بطيئة ومزدحمة لإختيار وجبتك المفضلة يومياً وبذلك نضمن لك إستلام طلبك في المعاد المحدد لذلك.",
-                                    textAlign: TextAlign.justify,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        ?.copyWith(fontSize: 14.0),
+                              child: Theme(
+                                data: Theme.of(context)
+                                    .copyWith(dividerColor: Colors.transparent),
+                                child: ExpansionTile(
+                                  tilePadding: EdgeInsets.zero,
+                                  title: const Text(
+                                    "نبذة عن التطبيق",
                                   ),
-                                ],
+                                  children: <Widget>[
+                                    Text(
+                                      "هذا التطبيق ببساطة يأخذ الطلبات المقدمة  من خلاله ويرسلها إلى مطبخ الكافتيريا ليتم إعداد وتحضير الوجبات وتقديمها للعاملين في اوقات واماكن الراحة الرسمية من خلال عملية مميكنة بالكامل حيث انك لن تكون مضطر إلى خوض تجربة بطيئة ومزدحمة لإختيار وجبتك المفضلة يومياً وبذلك نضمن لك إستلام طلبك في المعاد المحدد لذلك.",
+                                      textAlign: TextAlign.justify,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .caption
+                                          ?.copyWith(fontSize: 14.0),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -121,22 +125,26 @@ class MyDrawer extends StatelessWidget {
                             padding: const EdgeInsets.all(12.0),
                             child: Directionality(
                               textDirection: TextDirection.rtl,
-                              child: ExpansionTile(
-                                tilePadding: EdgeInsets.zero,
-                                title: const Text(
-                                  "كيف يمكنني إختيار طلبي؟",
-                                ),
-                                children: <Widget>[
-                                  Text(
-                                    'عن الطريق الذهاب لتطبيق كافتيرتي وإدخال كود التفعيل الخص بك من ثم إختيار وجبتك. وبمجرد إختيار طلبك سيتم إتاحة لك إمكانية الدفع عن طريق زر إدفع في صفحة سلتي.\n'
-                                    'برجاء الإنتباه جيداً من المهم التأكد من المعلومات المدخلة قبل تأكيد الدفع لأنه بمجرد الضغط على زر تأكيد الدفع سيتم خصم ثمن الوجبة المختارة من قبلك من مرتبك الشخصي مباشرةً مع سماحية تعديل أو حذف الطلب قبل الساعة التاسعة صباحاً فقط, ليقوم التطبيق بإرسال طلبك إلى المطبخ بحلول الساعة التاسعة صباحاً مباشرةً ليتم تحضيره وتقديمه لك في فترة الراحة.\n',
-                                    textAlign: TextAlign.justify,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        ?.copyWith(fontSize: 14.0),
+                              child: Theme(
+                                data: Theme.of(context)
+                                    .copyWith(dividerColor: Colors.transparent),
+                                child: ExpansionTile(
+                                  tilePadding: EdgeInsets.zero,
+                                  title: const Text(
+                                    "كيف يمكنني إختيار طلبي؟",
                                   ),
-                                ],
+                                  children: <Widget>[
+                                    Text(
+                                      'عن الطريق الذهاب لتطبيق كافتيرتي وإدخال كود التفعيل الخص بك من ثم إختيار وجبتك. وبمجرد إختيار طلبك سيتم إتاحة لك إمكانية الدفع عن طريق زر إدفع في صفحة سلتي.\n'
+                                      'برجاء الإنتباه جيداً من المهم التأكد من المعلومات المدخلة قبل تأكيد الدفع لأنه بمجرد الضغط على زر تأكيد الدفع سيتم خصم ثمن الوجبة المختارة من قبلك من مرتبك الشخصي مباشرةً مع سماحية تعديل أو حذف الطلب قبل الساعة التاسعة صباحاً فقط, ليقوم التطبيق بإرسال طلبك إلى المطبخ بحلول الساعة التاسعة صباحاً مباشرةً ليتم تحضيره وتقديمه لك في فترة الراحة.\n',
+                                      textAlign: TextAlign.justify,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .caption
+                                          ?.copyWith(fontSize: 14.0),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -144,21 +152,25 @@ class MyDrawer extends StatelessWidget {
                             padding: const EdgeInsets.all(12.0),
                             child: Directionality(
                               textDirection: TextDirection.rtl,
-                              child: ExpansionTile(
-                                tilePadding: EdgeInsets.zero,
-                                title: const Text(
-                                  "كم يكلفني إستخدام التطبيق؟",
-                                ),
-                                children: <Widget>[
-                                  Text(
-                                    'تطبيق كافتيرتي لا يأخذ اي رسوم إضافية مقابل إستخدامك للتطبيق فقط ثمن الوجبة.\n',
-                                    textAlign: TextAlign.justify,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        ?.copyWith(fontSize: 14.0),
+                              child: Theme(
+                                data: Theme.of(context)
+                                    .copyWith(dividerColor: Colors.transparent),
+                                child: ExpansionTile(
+                                  tilePadding: EdgeInsets.zero,
+                                  title: const Text(
+                                    "كم يكلفني إستخدام التطبيق؟",
                                   ),
-                                ],
+                                  children: <Widget>[
+                                    Text(
+                                      'تطبيق كافتيرتي لا يأخذ اي رسوم إضافية مقابل إستخدامك للتطبيق فقط ثمن الوجبة.\n',
+                                      textAlign: TextAlign.justify,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .caption
+                                          ?.copyWith(fontSize: 14.0),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -166,21 +178,25 @@ class MyDrawer extends StatelessWidget {
                             padding: const EdgeInsets.all(12.0),
                             child: Directionality(
                               textDirection: TextDirection.rtl,
-                              child: ExpansionTile(
-                                tilePadding: EdgeInsets.zero,
-                                title: const Text(
-                                  "ميزة الخصم المباشر من المرتب",
-                                ),
-                                children: <Widget>[
-                                  Text(
-                                    'يمكنك الدفع لكافتيريا الشركة عن طريق الطلب من خلال التطبيق مباشرةً وسيتم تحضير الطلب لك مسبقاً لإستلامه في الميعاد المحدد لفترة الراحة, أو يمكنك الدفع عن طريق الكود الخاص بك مباشرةً خلال فترة الراحة المحددة في الكافتيريا, حينها كل ما عليك فعله هو إختيار طلبك من ثم إظهر الكود الخاص بك للشخص المسئول عن تسليم الطلبات لتستلم طلبك وسيتم خصم ثمن الطلب من مرتبك الخاص مباشرةً دون الحاجة إلى الدفع نقدياً. \n',
-                                    textAlign: TextAlign.justify,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        ?.copyWith(fontSize: 14.0),
+                              child: Theme(
+                                data: Theme.of(context)
+                                    .copyWith(dividerColor: Colors.transparent),
+                                child: ExpansionTile(
+                                  tilePadding: EdgeInsets.zero,
+                                  title: const Text(
+                                    "ميزة الخصم المباشر من المرتب",
                                   ),
-                                ],
+                                  children: <Widget>[
+                                    Text(
+                                      'يمكنك الدفع لكافتيريا الشركة عن طريق الطلب من خلال التطبيق مباشرةً وسيتم تحضير الطلب لك مسبقاً لإستلامه في الميعاد المحدد لفترة الراحة, أو يمكنك الدفع عن طريق الكود الخاص بك مباشرةً خلال فترة الراحة المحددة في الكافتيريا, حينها كل ما عليك فعله هو إختيار طلبك من ثم إظهر الكود الخاص بك للشخص المسئول عن تسليم الطلبات لتستلم طلبك وسيتم خصم ثمن الطلب من مرتبك الخاص مباشرةً دون الحاجة إلى الدفع نقدياً. \n',
+                                      textAlign: TextAlign.justify,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .caption
+                                          ?.copyWith(fontSize: 14.0),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -188,21 +204,26 @@ class MyDrawer extends StatelessWidget {
                             padding: const EdgeInsets.all(12.0),
                             child: Directionality(
                               textDirection: TextDirection.rtl,
-                              child: ExpansionTile(
-                                tilePadding: EdgeInsets.zero,
-                                title: const Text(
-                                  "ماذا يحدث إذا لم أستلم طلبي؟",
+                              child: Theme(
+                                data: Theme.of(context).copyWith(
+                                  dividerColor: Colors.transparent,
                                 ),
-                                children: <Widget>[
-                                  Text(
-                                    'يمكنك الدفع لكافتيريا الشركة عن طريق الطلب من خلال التطبيق مباشرةً وسيتم تحضير الطلب لك مسبقاً لإستلامه في الميعاد المحدد لفترة الراحة, أو يمكنك الدفع عن طريق الكود الخاص بك مباشرةً خلال فترة الراحة المحددة في الكافتيريا, حينها كل ما عليك فعله هو إختيار طلبك من ثم إظهر الكود الخاص بك للشخص المسئول عن تسليم الطلبات لتستلم طلبك وسيتم خصم ثمن الطلب من مرتبك الخاص مباشرةً دون الحاجة إلى الدفع نقدياً. \n',
-                                    textAlign: TextAlign.justify,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        ?.copyWith(fontSize: 14.0),
+                                child: ExpansionTile(
+                                  tilePadding: EdgeInsets.zero,
+                                  title: const Text(
+                                    "ماذا يحدث إذا لم أستلم طلبي؟",
                                   ),
-                                ],
+                                  children: <Widget>[
+                                    Text(
+                                      'يمكنك الدفع لكافتيريا الشركة عن طريق الطلب من خلال التطبيق مباشرةً وسيتم تحضير الطلب لك مسبقاً لإستلامه في الميعاد المحدد لفترة الراحة, أو يمكنك الدفع عن طريق الكود الخاص بك مباشرةً خلال فترة الراحة المحددة في الكافتيريا, حينها كل ما عليك فعله هو إختيار طلبك من ثم إظهر الكود الخاص بك للشخص المسئول عن تسليم الطلبات لتستلم طلبك وسيتم خصم ثمن الطلب من مرتبك الخاص مباشرةً دون الحاجة إلى الدفع نقدياً. \n',
+                                      textAlign: TextAlign.justify,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .caption
+                                          ?.copyWith(fontSize: 14.0),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
