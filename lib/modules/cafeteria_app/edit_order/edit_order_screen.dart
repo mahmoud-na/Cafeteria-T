@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 bool isMyOrderEdited(context) {
+  print("ana geit hena \n\n\n\n\n\n\n\n");
   for (int i = 0;
       i < CafeteriaCubit.get(context).myOrderModel!.data!.orderList.length;
       i++) {
@@ -18,9 +19,11 @@ bool isMyOrderEdited(context) {
             .data!
             .orderList[i]
             .counter) {
+      print("true");
       return true;
     }
   }
+  print("false");
   return false;
 }
 
@@ -74,6 +77,7 @@ class MyOrderScreen extends StatelessWidget {
               ),
               toDoAfterClosing: () async {
                 await CafeteriaCubit.get(context).getMyOrderData();
+                CafeteriaCubit.get(context).reloadMyOrderData();
                 if (CafeteriaCubit.get(context)
                         .myOrderModel!
                         .data!
