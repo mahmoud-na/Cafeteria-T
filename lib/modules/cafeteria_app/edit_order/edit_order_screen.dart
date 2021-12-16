@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 bool isMyOrderEdited(context) {
-  print("ana geit hena \n\n\n\n\n\n\n\n");
   for (int i = 0;
       i < CafeteriaCubit.get(context).myOrderModel!.data!.orderList.length;
       i++) {
@@ -19,11 +18,9 @@ bool isMyOrderEdited(context) {
             .data!
             .orderList[i]
             .counter) {
-      print("true");
       return true;
     }
   }
-  print("false");
   return false;
 }
 
@@ -287,29 +284,31 @@ class MyOrderScreen extends StatelessWidget {
                 ),
               ],
             ),
-            Positioned(
-              top: -10,
-              left: 20,
-              child: TextButton(
-                onPressed: () => defaultShowDialog(
-                  context: context,
-                  content: "هل أنت متأكد من حذف الطلب",
-                  title: 'حذف الطلب',
-                  actions: [
-                    defaultAlertActionButtons(
-                      context: context,
-                      onPressed: () {
-                        cubit.deleteMyOrder();
-                      },
-                    ),
-                  ],
-                ),
-                child: const Text(
-                  "حذف",
-                  style: TextStyle(color: Colors.red, fontSize: 15.0),
+            if ((cubit.dateAndTimeNow?.hour ?? errorTempTime) <
+                timeLimitAllowed)
+              Positioned(
+                top: -10,
+                left: 20,
+                child: TextButton(
+                  onPressed: () => defaultShowDialog(
+                    context: context,
+                    content: "هل أنت متأكد من حذف الطلب",
+                    title: 'حذف الطلب',
+                    actions: [
+                      defaultAlertActionButtons(
+                        context: context,
+                        onPressed: () {
+                          cubit.deleteMyOrder();
+                        },
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    "حذف",
+                    style: TextStyle(color: Colors.red, fontSize: 15.0),
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       );
