@@ -1,10 +1,7 @@
-import 'dart:convert';
-
 import 'package:bloc/bloc.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cubit/cubit.dart';
 import 'package:cafeteriat/shared/bloc_observer.dart';
 import 'package:cafeteriat/shared/components/components.dart';
-import 'package:cafeteriat/shared/components/constants.dart';
 import 'package:cafeteriat/shared/cubit/cubit.dart';
 import 'package:cafeteriat/shared/cubit/states.dart';
 import 'package:cafeteriat/shared/network/local/cache_helper.dart';
@@ -12,15 +9,13 @@ import 'package:cafeteriat/shared/styles/themes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'layout/cafeteria_app/cafeteria_app_layout.dart';
-import 'models/cafeteria_app/user_model.dart';
+
 import 'modules/cafeteria_app/loading/cubit/cubit.dart';
 import 'modules/cafeteria_app/loading/loading_screen.dart';
-import 'modules/cafeteria_app/login/login_screen.dart';
 
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {}
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -35,8 +30,9 @@ Future<void> main() async {
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
-  bool? isDark = CacheHelper.getData(key: "isDark");
-
+  var brightness = SchedulerBinding.instance?.window.platformBrightness;
+  bool? isDark =
+      CacheHelper.getData(key: "isDark") ?? brightness == Brightness.dark;
   runApp(
     MyApp(
       isDark: isDark,

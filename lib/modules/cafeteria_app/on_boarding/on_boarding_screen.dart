@@ -1,8 +1,6 @@
-import 'package:cafeteriat/layout/cafeteria_app/cafeteria_app_layout.dart';
 import 'package:cafeteriat/shared/components/components.dart';
 import 'package:cafeteriat/shared/cubit/cubit.dart';
 import 'package:cafeteriat/shared/cubit/states.dart';
-import 'package:cafeteriat/shared/network/local/cache_helper.dart';
 import 'package:cafeteriat/shared/styles/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,7 +20,6 @@ class OnBoardingModel {
 
 class OnBoardingScreen extends StatelessWidget {
   OnBoardingScreen({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AppCubit, AppStates>(
