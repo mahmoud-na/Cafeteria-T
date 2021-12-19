@@ -90,7 +90,7 @@ class SearchScreen extends StatelessWidget {
         listener: (context, state) {},
         builder: (context, state) {
           var cubit = CafeteriaCubit.get(context);
-          return Column(
+          return Stack(
             children: [
               SizedBox(
                 height: 150.0,
@@ -144,7 +144,11 @@ class SearchScreen extends StatelessWidget {
                           children: [
                             Text(
                               "${menuModel.name}",
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
+                                height: 1.0,
                                 fontSize: 20.0,
                               ),
                             ),
@@ -175,6 +179,7 @@ class SearchScreen extends StatelessWidget {
                                   child: cubit.shopItemRemoveIcon(
                                     menuModel,
                                     context,
+                                    false,
                                   ),
                                 ),
                               ],
@@ -186,6 +191,40 @@ class SearchScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              if (menuModel.runtimeType == ProductDataModel)
+                if (menuModel.quantity == 0)
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.all(8.0),
+                        width: double.infinity,
+                        height: 134.0,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.8),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(5.0),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error,
+                            color: Colors.amberAccent,
+                          ),
+                          const SizedBox(
+                            width: 5.0,
+                          ),
+                          Text(
+                            "عذراً، لقد نفذت الكمية برجاء إختيار منتج اخر",
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
             ],
           );
         },
@@ -227,7 +266,6 @@ class SearchScreen extends StatelessWidget {
               ),
             );
           } else {
-            // print(searchList[index].name!);
             return shopItem(
               menuModel: findAndDisplayMenu(
                 menuList: model.data!.snacks,

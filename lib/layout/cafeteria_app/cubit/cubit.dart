@@ -224,18 +224,6 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
       emit(CafeteriaPreviousHistoryErrorState(error.toString()));
     });
   }
-
-  // void getOrderNumberAndDate() {
-  //   emit(CafeteriaOrderNumberAndDateLoadingState());
-  //   SocketHelper.getData(
-  //     query: "EID:$uId,OrderNumberAndDate<EOF>",
-  //   ).then((value) {
-  //     emit(CafeteriaOrderNumberAndDateSuccessState());
-  //   }).catchError((error) {
-  //     print(error.toString());
-  //     emit(CafeteriaOrderNumberAndDateErrorState(error.toString()));
-  //   });
-  // }
   MyOrderModel? myOrderModel;
   MyOrderModel? myEditedOrderModel;
 
@@ -365,17 +353,18 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
   void clearCard({
     required ProductDataModel card,
     required BuildContext context,
+    required bool mayPop
   }) {
     myCartDataModel!.totalItems =
         myCartDataModel!.totalItems - (card.counter - 1);
     myCartDataModel!.totalPrice =
         myCartDataModel!.totalPrice - (card.price * (card.counter - 1));
     card.counter = 0;
-    removeFromCart(card, context);
+    removeFromCart(card, context,mayPop);
     emit(CafeteriaChangeDecrementCounterSuccessState());
   }
 
-  Widget shopItemRemoveIcon(var model, context) {
+  Widget shopItemRemoveIcon(var model, context, mayPop) {
     if (model.counter > 0 &&
         (dateAndTimeNow?.hour ?? errorTempTime) < timeLimitAllowed) {
       return GestureDetector(
@@ -389,10 +378,11 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
             clearCard(
               card: model,
               context: context,
+              mayPop: mayPop
             );
           }
         },
-        onTap: () => decrementMenuItemCounter(model, context),
+        onTap: () => decrementMenuItemCounter(model, context, mayPop),
       );
     } else {
       return const IconButton(
@@ -443,13 +433,13 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     emit(CafeteriaChangeIncrementCounterSuccessState());
   }
 
-  void decrementMenuItemCounter(var model, context) {
+  void decrementMenuItemCounter(var model, context, bool mayPop) {
     model.counter = model.counter - 1;
     if (model.runtimeType == MyOrderListModel) {
       myEditedOrderModel!.data!.totalPrice =
           myEditedOrderModel!.data!.totalPrice! - model.price;
     } else {
-      removeFromCart(model, context);
+      removeFromCart(model, context, mayPop);
     }
     emit(CafeteriaChangeDecrementCounterSuccessState());
   }
@@ -482,16 +472,13 @@ class CafeteriaCubit extends Cubit<CafeteriaStates> {
     print(savedMyCartString);
   }
 
-  void removeFromCart(
-    var menuModel,
-    BuildContext context,
-  ) {
+  void removeFromCart(var menuModel, BuildContext context, bool mayPop) {
     if (menuModel.counter == 0) {
       myCartDataModel!.products.remove(menuModel);
       getDateAndTimeNow().then((value) {
         myCartDataModel!.lastUpdateTime = value.day;
       });
-      if (myCartDataModel!.products.isEmpty) {
+      if (myCartDataModel!.products.isEmpty && mayPop) {
         Navigator.of(context).maybePop();
       }
     }
