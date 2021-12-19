@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:cafeteriat/layout/cafeteria_app/cafeteria_app_layout.dart';
-import 'package:cafeteriat/modules/cafeteria_app/on_boarding/on_boarding_screen.dart';
 import 'package:cafeteriat/shared/components/components.dart';
 import 'package:cafeteriat/shared/cubit/states.dart';
 import 'package:cafeteriat/shared/network/local/cache_helper.dart';
@@ -14,7 +12,6 @@ class AppCubit extends Cubit<AppStates> {
 
   static AppCubit get(context) => BlocProvider.of(context);
   bool isDarkMode = true;
-
   PageController boardingController = PageController();
   bool isLastIndex = false;
 
@@ -27,11 +24,13 @@ class AppCubit extends Cubit<AppStates> {
       },
     );
   }
-  void changePageViewIndex({required bool isLastPageView}){
-        isLastIndex = isLastPageView;
-        emit(AppPageViewIndexState());
+
+  void changePageViewIndex({required bool isLastPageView}) {
+    isLastIndex = isLastPageView;
+    emit(AppPageViewIndexState());
   }
-  void nextOnBoardingPage(){
+
+  void nextOnBoardingPage() {
     boardingController.nextPage(
       duration: const Duration(
         milliseconds: 750,
@@ -41,7 +40,7 @@ class AppCubit extends Cubit<AppStates> {
     emit(AppPageViewNextPageState());
   }
 
-  void animateToNextOnBoardingPage({required int index}){
+  void animateToNextOnBoardingPage({required int index}) {
     boardingController.animateToPage(
       index,
       duration: const Duration(
