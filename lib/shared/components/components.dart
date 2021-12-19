@@ -279,6 +279,8 @@ Widget shopItem({
                       Text(
                         "${menuModel.name}",
                         textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           height: 1.0,
                           fontSize: 20.0,
@@ -312,6 +314,7 @@ Widget shopItem({
                             child: cubit.shopItemRemoveIcon(
                               menuModel,
                               context,
+                              true
                             ),
                           ),
                         ],

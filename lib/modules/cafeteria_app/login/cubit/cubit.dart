@@ -14,7 +14,8 @@ class CafeteriaLoginCubit extends Cubit<CafeteriaLoginStates> {
 
   static CafeteriaLoginCubit get(context) => BlocProvider.of(context);
 
-  bool isLoading =false;
+  bool isLoading = false;
+
   Map userModelToMap({
     required String userID,
     required String userName,
@@ -38,15 +39,14 @@ class CafeteriaLoginCubit extends Cubit<CafeteriaLoginStates> {
     required String activationCode,
   }) async {
     emit(CafeteriaUserDataLoadingState());
-    isLoading =true;
+    isLoading = true;
     await SocketHelper.getData(query: "EID:0,ACTCODE:$activationCode<EOF>")
         .then((value) async {
       userModel = UserModel.fromJson(value);
-
-
       emit(CafeteriaUserDataSuccessState(userModel: userModel!));
     }).catchError((error) {
       print(error.toString());
+      isLoading = false;
       emit(CafeteriaUserDataErrorState(error.toString()));
     });
   }
